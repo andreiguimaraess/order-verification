@@ -30,36 +30,24 @@
                 </div>
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">Smart Order Verification</h1>
-                    <p class="text-gray-600 text-sm">Intelligent field-by-field comparison</p>
+                    <p class="text-gray-600 text-sm">Intelligent label-to-system comparison</p>
                 </div>
             </div>
         </div>
 
-        <!-- How It Works -->
-        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded">
-            <h3 class="font-bold text-blue-900 mb-2">🧠 How It Works:</h3>
-            <ol class="text-sm text-blue-800 space-y-1 ml-4 list-decimal">
-                <li><strong>Step 1:</strong> Extracts order number from both images (primary key)</li>
-                <li><strong>Step 2:</strong> Confirms both images are for the SAME order</li>
-                <li><strong>Step 3:</strong> Compares ALL fields dynamically (location, quantity, address, etc.)</li>
-                <li><strong>Step 4:</strong> Reports ANY differences found between system and label</li>
-            </ol>
-        </div>
-
         <!-- Upload Section -->
         <div class="grid md:grid-cols-2 gap-6 mb-6">
-            <!-- System Screenshot -->
             <div class="bg-white rounded-lg shadow-lg p-6">
                 <h2 class="text-lg font-bold text-gray-900 mb-4">1️⃣ System Order</h2>
                 <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition cursor-pointer" onclick="document.getElementById('systemImage').click()">
                     <div id="systemPreview" class="hidden">
                         <img id="systemImg" class="max-h-64 mx-auto rounded mb-4 object-contain">
-                        <p class="text-sm text-gray-600 mb-2">System screenshot uploaded ✓</p>
+                        <p class="text-sm text-gray-600 mb-2">Screenshot uploaded ✓</p>
                     </div>
                     <div id="systemPlaceholder">
                         <div class="text-4xl mb-2">🖥️</div>
                         <p class="text-gray-600 font-semibold mb-1">System Screenshot</p>
-                        <p class="text-sm text-gray-500">Order info from your system</p>
+                        <p class="text-sm text-gray-500">Order from your system</p>
                     </div>
                 </div>
                 <input type="file" id="systemImage" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'system')">
@@ -68,7 +56,6 @@
                 </button>
             </div>
 
-            <!-- Physical Label Photo -->
             <div class="bg-white rounded-lg shadow-lg p-6">
                 <h2 class="text-lg font-bold text-gray-900 mb-4">2️⃣ Physical Label</h2>
                 <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-green-400 transition cursor-pointer" onclick="document.getElementById('labelImage').click()">
@@ -79,24 +66,23 @@
                     <div id="labelPlaceholder">
                         <div class="text-4xl mb-2">📦</div>
                         <p class="text-gray-600 font-semibold mb-1">Physical Label</p>
-                        <p class="text-sm text-gray-500">Photo of the actual box label</p>
+                        <p class="text-sm text-gray-500">Photo of the box label</p>
                     </div>
                 </div>
                 <input type="file" id="labelImage" accept="image/*" capture="environment" class="hidden" onchange="handleImageUpload(event, 'label')">
                 <button onclick="document.getElementById('labelImage').click()" class="mt-4 w-full bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition">
-                    📸 Take Photo / Choose File
+                    📸 Take Photo
                 </button>
             </div>
         </div>
 
-        <!-- Compare Button -->
         <div class="text-center mb-6">
             <button id="compareBtn" onclick="compareImages()" disabled class="bg-gray-400 text-white px-12 py-4 rounded-lg text-lg font-semibold cursor-not-allowed transition-all">
                 Upload Both Images First
             </button>
         </div>
 
-        <!-- Processing Status -->
+        <!-- Processing -->
         <div id="processingStatus" class="hidden bg-blue-50 border-2 border-blue-200 rounded-lg p-6 mb-6">
             <div class="flex items-center gap-4">
                 <div class="spinner"></div>
@@ -110,31 +96,39 @@
             </div>
         </div>
 
-        <!-- Results Section -->
+        <!-- Results -->
         <div id="results" class="hidden">
-            <!-- Order Verification Status -->
-            <div id="orderStatus" class="mb-6"></div>
+            <!-- Main Verdict -->
+            <div id="verdict" class="mb-6"></div>
 
-            <!-- Extracted Text Preview -->
-            <div class="grid md:grid-cols-2 gap-6 mb-6">
-                <div class="bg-white rounded-lg shadow-lg p-4">
-                    <h3 class="font-bold text-gray-900 mb-3 text-sm flex items-center gap-2">
-                        <span class="text-blue-600">🖥️</span> System Text
-                    </h3>
-                    <pre id="systemData" class="bg-gray-50 p-3 rounded text-xs font-mono overflow-auto max-h-48 whitespace-pre-wrap border border-gray-200"></pre>
+            <!-- Details (collapsible) -->
+            <div id="detailsSection" class="hidden">
+                <button onclick="toggleDetails()" class="w-full bg-white rounded-lg shadow p-4 mb-6 text-left hover:bg-gray-50 transition">
+                    <div class="flex items-center justify-between">
+                        <span class="font-semibold text-gray-900">📋 View Detailed Comparison</span>
+                        <span id="detailsToggle">▼</span>
+                    </div>
+                </button>
+                
+                <div id="detailsContent" class="hidden space-y-4 mb-6">
+                    <!-- Field comparisons -->
+                    <div id="fieldDetails" class="bg-white rounded-lg shadow-lg p-6"></div>
+                    
+                    <!-- Raw text -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="font-bold text-gray-900 mb-4">Raw Extracted Text</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-xs text-gray-600 mb-2 font-semibold">System:</p>
+                                <pre id="systemData" class="bg-gray-50 p-3 rounded text-xs font-mono overflow-auto max-h-48 whitespace-pre-wrap border"></pre>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-600 mb-2 font-semibold">Label:</p>
+                                <pre id="labelData" class="bg-gray-50 p-3 rounded text-xs font-mono overflow-auto max-h-48 whitespace-pre-wrap border"></pre>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="bg-white rounded-lg shadow-lg p-4">
-                    <h3 class="font-bold text-gray-900 mb-3 text-sm flex items-center gap-2">
-                        <span class="text-green-600">📦</span> Label Text
-                    </h3>
-                    <pre id="labelData" class="bg-gray-50 p-3 rounded text-xs font-mono overflow-auto max-h-48 whitespace-pre-wrap border border-gray-200"></pre>
-                </div>
-            </div>
-
-            <!-- Field-by-Field Comparison -->
-            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-                <h3 class="font-bold text-gray-900 mb-4 text-xl">📊 Field-by-Field Comparison</h3>
-                <div id="fieldComparison"></div>
             </div>
 
             <!-- Actions -->
@@ -155,6 +149,7 @@
         let systemText = '';
         let labelText = '';
         let comparisonResults = null;
+        let detailsVisible = false;
 
         function handleImageUpload(event, type) {
             const file = event.target.files[0];
@@ -191,10 +186,24 @@
             }
         }
 
-        // Fuzzy string matching (Levenshtein distance)
+        function toggleDetails() {
+            detailsVisible = !detailsVisible;
+            const content = document.getElementById('detailsContent');
+            const toggle = document.getElementById('detailsToggle');
+            
+            if (detailsVisible) {
+                content.classList.remove('hidden');
+                toggle.textContent = '▲';
+            } else {
+                content.classList.add('hidden');
+                toggle.textContent = '▼';
+            }
+        }
+
         function similarity(s1, s2) {
-            s1 = s1.toLowerCase().trim();
-            s2 = s2.toLowerCase().trim();
+            if (!s1 || !s2) return 0;
+            s1 = s1.toLowerCase().replace(/[^a-z0-9]/g, '');
+            s2 = s2.toLowerCase().replace(/[^a-z0-9]/g, '');
             
             if (s1 === s2) return 1.0;
             
@@ -203,29 +212,12 @@
             
             if (longer.length === 0) return 1.0;
             
-            const editDistance = levenshteinDistance(longer, shorter);
-            return (longer.length - editDistance) / longer.length;
-        }
-
-        function levenshteinDistance(s1, s2) {
-            const costs = [];
-            for (let i = 0; i <= s1.length; i++) {
-                let lastValue = i;
-                for (let j = 0; j <= s2.length; j++) {
-                    if (i === 0) {
-                        costs[j] = j;
-                    } else if (j > 0) {
-                        let newValue = costs[j - 1];
-                        if (s1.charAt(i - 1) !== s2.charAt(j - 1)) {
-                            newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
-                        }
-                        costs[j - 1] = lastValue;
-                        lastValue = newValue;
-                    }
-                }
-                if (i > 0) costs[s2.length] = lastValue;
+            let matches = 0;
+            for (let i = 0; i < shorter.length; i++) {
+                if (longer.includes(shorter[i])) matches++;
             }
-            return costs[s2.length];
+            
+            return matches / longer.length;
         }
 
         async function compareImages() {
@@ -243,10 +235,10 @@
                 document.getElementById('labelData').textContent = labelText || 'No text detected';
                 updateStatus('Label processed ✓', 90);
 
-                updateStatus('Analyzing and comparing...', 95);
+                updateStatus('Comparing...', 95);
                 await new Promise(resolve => setTimeout(resolve, 500));
                 
-                comparisonResults = intelligentCompare(systemText, labelText);
+                comparisonResults = smartCompare(systemText, labelText);
                 displayResults(comparisonResults);
                 
                 updateStatus('Complete!', 100);
@@ -257,8 +249,7 @@
 
             } catch (error) {
                 console.error('Error:', error);
-                updateStatus('Error: ' + error.message, 0);
-                alert('Error processing images. Please try again.');
+                alert('Error processing images. Please try again with clearer photos.');
                 document.getElementById('processingStatus').classList.add('hidden');
             }
         }
@@ -281,330 +272,329 @@
                 );
                 return result.data.text;
             } catch (error) {
-                throw new Error('Failed to read ' + source + ' image');
+                throw new Error('Failed to read ' + source);
             }
         }
 
-        function intelligentCompare(systemText, labelText) {
-            // STEP 1: Parse both texts into structured data
-            const systemData = parseOrderData(systemText);
-            const labelData = parseOrderData(labelText);
+        function smartCompare(systemText, labelText) {
+            const systemData = parseStructured(systemText);
+            const labelData = parseStructured(labelText);
 
-            // STEP 2: Find order number match (PRIMARY KEY)
+            // Find order number match
             let orderMatch = null;
-            let orderSimilarity = 0;
+            let orderSim = 0;
 
-            for (const sysOrder of systemData.orderNumbers) {
-                for (const lblOrder of labelData.orderNumbers) {
-                    const sim = similarity(sysOrder, lblOrder);
-                    if (sim > orderSimilarity) {
-                        orderSimilarity = sim;
-                        if (sim >= 0.75) {
-                            orderMatch = {
-                                system: sysOrder,
-                                label: lblOrder,
-                                similarity: sim
-                            };
-                        }
-                    }
+            if (systemData.orderNumber && labelData.orderNumber) {
+                orderSim = similarity(systemData.orderNumber, labelData.orderNumber);
+                if (orderSim >= 0.75) {
+                    orderMatch = {
+                        system: systemData.orderNumber,
+                        label: labelData.orderNumber,
+                        similarity: orderSim
+                    };
                 }
             }
 
-            // STEP 3: If orders match, compare ALL fields dynamically
-            const fieldComparisons = [];
-
+            // Compare fields if order matches
+            const fieldResults = [];
+            
             if (orderMatch) {
-                // Compare all detected fields
-                const allFieldTypes = new Set([
-                    ...Object.keys(systemData.fields),
-                    ...Object.keys(labelData.fields)
-                ]);
-
-                allFieldTypes.forEach(fieldType => {
-                    const sysValues = systemData.fields[fieldType] || [];
-                    const lblValues = labelData.fields[fieldType] || [];
-
-                    if (sysValues.length === 0 && lblValues.length === 0) return;
-
-                    // Try to match values
-                    let matched = false;
-                    let bestMatch = null;
-                    let bestSim = 0;
-
-                    for (const sysVal of sysValues) {
-                        for (const lblVal of lblValues) {
-                            const sim = similarity(sysVal, lblVal);
-                            if (sim > bestSim) {
-                                bestSim = sim;
-                                bestMatch = { sysVal, lblVal, sim };
-                                if (sim >= 0.85) matched = true;
-                            }
-                        }
-                    }
-
-                    fieldComparisons.push({
-                        field: fieldType,
-                        systemValue: sysValues.join(', ') || 'Not found',
-                        labelValue: lblValues.join(', ') || 'Not found',
-                        matched: matched,
-                        similarity: bestSim,
-                        status: matched ? 'match' : (sysValues.length === 0 || lblValues.length === 0) ? 'missing' : 'mismatch'
+                // Location
+                if (systemData.location || labelData.location) {
+                    const locSim = similarity(systemData.location, labelData.location);
+                    fieldResults.push({
+                        name: 'Location',
+                        system: systemData.location || 'Not found',
+                        label: labelData.location || 'Not found',
+                        match: locSim >= 0.85,
+                        similarity: locSim
                     });
-                });
+                }
+
+                // Quantity
+                if (systemData.quantity || labelData.quantity) {
+                    const match = systemData.quantity === labelData.quantity;
+                    fieldResults.push({
+                        name: 'Quantity',
+                        system: systemData.quantity || 'Not found',
+                        label: labelData.quantity || 'Not found',
+                        match: match,
+                        similarity: match ? 1.0 : 0
+                    });
+                }
+
+                // Address
+                if (systemData.address || labelData.address) {
+                    const addrSim = similarity(systemData.address, labelData.address);
+                    fieldResults.push({
+                        name: 'Address',
+                        system: systemData.address || 'Not found',
+                        label: labelData.address || 'Not found',
+                        match: addrSim >= 0.80,
+                        similarity: addrSim
+                    });
+                }
+
+                // Postal
+                if (systemData.postal || labelData.postal) {
+                    const match = systemData.postal === labelData.postal;
+                    fieldResults.push({
+                        name: 'Postal Code',
+                        system: systemData.postal || 'Not found',
+                        label: labelData.postal || 'Not found',
+                        match: match,
+                        similarity: match ? 1.0 : 0
+                    });
+                }
             }
 
             return {
                 orderMatch,
-                orderSimilarity,
-                systemOrders: systemData.orderNumbers,
-                labelOrders: labelData.orderNumbers,
-                fieldComparisons,
-                systemAllFields: systemData.fields,
-                labelAllFields: labelData.fields
+                orderSim,
+                fieldResults,
+                systemData,
+                labelData
             };
         }
 
-        function parseOrderData(text) {
-            const data = {
-                orderNumbers: [],
-                fields: {}
-            };
+        function parseStructured(text) {
+            const data = {};
+            const lines = text.split('\n').map(l => l.trim()).filter(l => l);
 
-            // Extract order numbers (multiple patterns)
-            const orderPatterns = [
-                /(?:order|ord|#|nr|nummer)\s*:?\s*([A-Z0-9-]+)/gi,
-                /\b([A-Z]{2,4}[-]?\d{3,})\b/g,
-                /\b(\d{5,})\b/g
-            ];
-
-            orderPatterns.forEach(pattern => {
-                const matches = [...text.matchAll(pattern)].map(m => m[1] || m[0]);
-                data.orderNumbers.push(...matches);
-            });
-            data.orderNumbers = [...new Set(data.orderNumbers)].map(o => o.replace(/[^a-z0-9]/gi, '').toUpperCase());
-
-            // Extract location/destination
-            const locationPatterns = [
-                /(?:location|loc|locatie|plaats)\s*:?\s*([^\n\r,;]{3,30})/gi,
-                /(?:destination|bestemming|naar|to)\s*:?\s*([^\n\r,;]{3,30})/gi,
-                /(?:city|stad|plaats)\s*:?\s*([A-Za-z\s]+)/gi
-            ];
-            data.fields.location = [];
-            locationPatterns.forEach(pattern => {
-                const matches = [...text.matchAll(pattern)].map(m => m[1].trim());
-                data.fields.location.push(...matches);
-            });
-            data.fields.location = [...new Set(data.fields.location)];
-
-            // Extract quantity
-            const qtyPatterns = [
-                /(?:qty|quantity|aantal|stuks|pcs|pieces)\s*:?\s*(\d+)/gi,
-                /(\d+)\s*(?:pcs|stuks|pieces|units)/gi
-            ];
-            data.fields.quantity = [];
-            qtyPatterns.forEach(pattern => {
-                const matches = [...text.matchAll(pattern)].map(m => m[1]);
-                data.fields.quantity.push(...matches);
-            });
-            data.fields.quantity = [...new Set(data.fields.quantity)];
-
-            // Extract address components
-            data.fields.address = [];
-            const addressPattern = /(?:address|adres|straat|street)\s*:?\s*([^\n\r]{5,50})/gi;
-            const matches = [...text.matchAll(addressPattern)].map(m => m[1].trim());
-            data.fields.address.push(...matches);
-
-            // Extract postal codes
-            data.fields.postal = [];
-            const postalPattern = /\b\d{4}\s?[A-Z]{2}\b/g;
-            const postalMatches = text.match(postalPattern) || [];
-            data.fields.postal.push(...postalMatches);
-
-            // Extract dates
-            data.fields.date = [];
-            const datePattern = /\b\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4}\b/g;
-            const dateMatches = text.match(datePattern) || [];
-            data.fields.date.push(...dateMatches);
-
-            // Extract any field with ":" pattern (dynamic)
-            const genericPattern = /([A-Za-z]{3,20})\s*:\s*([^\n\r:]{2,40})/g;
-            const genericMatches = [...text.matchAll(genericPattern)];
-            genericMatches.forEach(match => {
-                const fieldName = match[1].toLowerCase().trim();
-                const fieldValue = match[2].trim();
-                
-                // Skip if already captured
-                if (['order', 'qty', 'quantity', 'location', 'address', 'date'].includes(fieldName)) return;
-                
-                if (!data.fields[fieldName]) {
-                    data.fields[fieldName] = [];
+            // Find order number - look for label then value
+            for (let i = 0; i < lines.length - 1; i++) {
+                const line = lines[i].toLowerCase();
+                if (line.match(/^(order|ord|nummer|#|nr)[\s:]*$/)) {
+                    // Next line is the value
+                    data.orderNumber = lines[i + 1].replace(/[^a-z0-9-]/gi, '').toUpperCase();
+                    break;
                 }
-                data.fields[fieldName].push(fieldValue);
-            });
+            }
+            
+            // Also try inline pattern
+            if (!data.orderNumber) {
+                const match = text.match(/(?:order|ord|#|nr|nummer)\s*[:=]?\s*([A-Z0-9-]+)/i);
+                if (match) {
+                    data.orderNumber = match[1].replace(/[^a-z0-9-]/gi, '').toUpperCase();
+                }
+            }
+
+            // Find location - same pattern
+            for (let i = 0; i < lines.length - 1; i++) {
+                const line = lines[i].toLowerCase();
+                if (line.match(/^(location|locatie|destination|plaats)[\s:]*$/)) {
+                    data.location = lines[i + 1];
+                    break;
+                }
+            }
+            if (!data.location) {
+                const match = text.match(/(?:location|locatie|destination|plaats)\s*[:=]?\s*([^\n]{3,30})/i);
+                if (match) data.location = match[1].trim();
+            }
+
+            // Find quantity
+            for (let i = 0; i < lines.length - 1; i++) {
+                const line = lines[i].toLowerCase();
+                if (line.match(/^(qty|quantity|aantal)[\s:]*$/)) {
+                    const nextLine = lines[i + 1];
+                    const num = nextLine.match(/\d+/);
+                    if (num) data.quantity = num[0];
+                    break;
+                }
+            }
+            if (!data.quantity) {
+                const match = text.match(/(?:qty|quantity|aantal)\s*[:=]?\s*(\d+)/i);
+                if (match) data.quantity = match[1];
+            }
+
+            // Find address
+            for (let i = 0; i < lines.length - 1; i++) {
+                const line = lines[i].toLowerCase();
+                if (line.match(/^(address|adres|straat)[\s:]*$/)) {
+                    data.address = lines[i + 1];
+                    break;
+                }
+            }
+            if (!data.address) {
+                const match = text.match(/(?:address|adres|straat)\s*[:=]?\s*([^\n]{5,50})/i);
+                if (match) data.address = match[1].trim();
+            }
+
+            // Find postal code
+            const postalMatch = text.match(/\b(\d{4}\s?[A-Z]{2})\b/);
+            if (postalMatch) data.postal = postalMatch[1];
 
             return data;
         }
 
         function displayResults(results) {
-            // Order Status
-            const orderStatusDiv = document.getElementById('orderStatus');
+            const verdictDiv = document.getElementById('verdict');
             
+            // Case 1: Order numbers don't match
             if (!results.orderMatch) {
-                orderStatusDiv.innerHTML = `
-                    <div class="border-4 bg-red-50 border-red-600 rounded-lg p-6">
-                        <div class="flex items-center gap-4">
-                            <div class="text-6xl">🚫</div>
-                            <div class="flex-1">
-                                <h4 class="text-2xl font-bold text-red-900 mb-2">WRONG ORDER!</h4>
-                                <p class="text-red-700 font-semibold">System and label are for DIFFERENT orders</p>
-                                <div class="grid grid-cols-2 gap-4 mt-4 text-sm bg-white p-3 rounded">
-                                    <div>
-                                        <span class="text-gray-600">System Orders:</span>
-                                        <div class="font-mono font-bold text-red-900">${results.systemOrders.join(', ') || 'None found'}</div>
-                                    </div>
-                                    <div>
-                                        <span class="text-gray-600">Label Orders:</span>
-                                        <div class="font-mono font-bold text-red-900">${results.labelOrders.join(', ') || 'None found'}</div>
-                                    </div>
-                                </div>
-                                <p class="text-red-800 font-bold mt-3 text-lg">⚠️ DO NOT SHIP THIS BOX</p>
+                verdictDiv.innerHTML = `
+                    <div class="bg-red-50 border-4 border-red-600 rounded-xl p-8">
+                        <div class="text-center mb-6">
+                            <div class="text-8xl mb-4">🚫</div>
+                            <h2 class="text-3xl font-bold text-red-900 mb-3">WRONG ORDER!</h2>
+                            <p class="text-xl text-red-700 font-semibold">Order number mismatch</p>
+                        </div>
+                        <div class="bg-white rounded-lg p-6 grid md:grid-cols-2 gap-6">
+                            <div class="text-center">
+                                <p class="text-sm text-gray-600 mb-2">System Order:</p>
+                                <p class="text-2xl font-mono font-bold text-gray-900">${results.systemData.orderNumber || 'Not found'}</p>
                             </div>
+                            <div class="text-center">
+                                <p class="text-sm text-gray-600 mb-2">Label Order:</p>
+                                <p class="text-2xl font-mono font-bold text-gray-900">${results.labelData.orderNumber || 'Not found'}</p>
+                            </div>
+                        </div>
+                        <div class="mt-6 bg-red-100 border-2 border-red-700 rounded-lg p-4 text-center">
+                            <p class="text-red-900 font-bold text-xl">⚠️ DO NOT SHIP THIS BOX</p>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('detailsSection').classList.add('hidden');
+                return;
+            }
+
+            // Case 2: Order matches - check fields
+            const mismatches = results.fieldResults.filter(f => !f.match);
+            const allGood = mismatches.length === 0;
+
+            if (allGood) {
+                // All perfect
+                verdictDiv.innerHTML = `
+                    <div class="bg-green-50 border-4 border-green-600 rounded-xl p-8">
+                        <div class="text-center mb-6">
+                            <div class="text-8xl mb-4">✅</div>
+                            <h2 class="text-3xl font-bold text-green-900 mb-3">ORDER VERIFIED!</h2>
+                            <p class="text-xl text-green-700">Order: <span class="font-mono font-bold">${results.orderMatch.system}</span></p>
+                        </div>
+                        <div class="bg-white rounded-lg p-6">
+                            <p class="text-center text-green-800 font-semibold text-lg">All details match perfectly</p>
+                            <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3 text-center text-sm">
+                                ${results.fieldResults.map(f => `
+                                    <div class="bg-green-50 rounded p-2">
+                                        <span class="text-green-700">✓ ${f.name}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="mt-6 bg-green-100 border-2 border-green-700 rounded-lg p-4 text-center">
+                            <p class="text-green-900 font-bold text-xl">✓ SAFE TO SHIP</p>
                         </div>
                     </div>
                 `;
             } else {
-                const allMatched = results.fieldComparisons.every(f => f.status === 'match');
-                const hasMismatches = results.fieldComparisons.some(f => f.status === 'mismatch');
-                
-                orderStatusDiv.innerHTML = `
-                    <div class="border-4 ${allMatched ? 'bg-green-50 border-green-600' : 'bg-yellow-50 border-yellow-600'} rounded-lg p-6">
-                        <div class="flex items-center gap-4">
-                            <div class="text-6xl">${allMatched ? '✅' : '⚠️'}</div>
-                            <div class="flex-1">
-                                <h4 class="text-2xl font-bold ${allMatched ? 'text-green-900' : 'text-yellow-900'} mb-2">
-                                    Order Match: ${results.orderMatch.system}
-                                </h4>
-                                <p class="${allMatched ? 'text-green-700' : 'text-yellow-700'} font-semibold">
-                                    System and label are for the SAME order (${(results.orderSimilarity * 100).toFixed(0)}% match)
-                                </p>
-                                ${hasMismatches ? '<p class="text-red-700 font-bold mt-2 text-lg">⚠️ BUT there are differences in the details - see below</p>' : '<p class="text-green-700 font-bold mt-2">All details match perfectly ✓</p>'}
-                            </div>
+                // Has mismatches
+                const mismatchNames = mismatches.map(m => m.name).join(', ');
+                verdictDiv.innerHTML = `
+                    <div class="bg-yellow-50 border-4 border-yellow-600 rounded-xl p-8">
+                        <div class="text-center mb-6">
+                            <div class="text-8xl mb-4">⚠️</div>
+                            <h2 class="text-3xl font-bold text-yellow-900 mb-3">MISMATCHES FOUND</h2>
+                            <p class="text-xl text-yellow-700">Order: <span class="font-mono font-bold">${results.orderMatch.system}</span> ✓</p>
+                            <p class="text-lg text-yellow-800 mt-2">But details don't match</p>
+                        </div>
+                        <div class="bg-white rounded-lg p-6">
+                            <p class="text-red-700 font-bold text-lg mb-4">❌ Mismatches:</p>
+                            ${mismatches.map(m => `
+                                <div class="bg-red-50 border-2 border-red-300 rounded-lg p-4 mb-3">
+                                    <p class="font-bold text-red-900 mb-2">${m.name} mismatch</p>
+                                    <div class="grid grid-cols-2 gap-4 text-sm">
+                                        <div>
+                                            <span class="text-gray-600">System:</span>
+                                            <span class="font-mono font-bold ml-2">${m.system}</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-600">Label:</span>
+                                            <span class="font-mono font-bold ml-2">${m.label}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="mt-6 bg-yellow-100 border-2 border-yellow-700 rounded-lg p-4 text-center">
+                            <p class="text-yellow-900 font-bold text-xl">⚠️ VERIFY BEFORE SHIPPING</p>
                         </div>
                     </div>
                 `;
             }
 
-            // Field Comparisons
-            const fieldDiv = document.getElementById('fieldComparison');
+            // Show details section
+            document.getElementById('detailsSection').classList.remove('hidden');
             
-            if (!results.orderMatch) {
-                fieldDiv.innerHTML = `
-                    <div class="bg-gray-50 border border-gray-300 rounded p-4 text-center text-gray-600">
-                        Cannot compare fields - orders do not match
-                    </div>
-                `;
-                return;
-            }
-
-            if (results.fieldComparisons.length === 0) {
-                fieldDiv.innerHTML = `
-                    <div class="bg-gray-50 border border-gray-300 rounded p-4 text-center text-gray-600">
-                        No specific fields detected to compare. Review the extracted text above.
-                    </div>
-                `;
-                return;
-            }
-
-            let html = '<div class="space-y-3">';
-            
-            results.fieldComparisons.forEach(field => {
-                const bgColor = field.status === 'match' ? 'bg-green-50 border-green-400' :
-                               field.status === 'mismatch' ? 'bg-red-50 border-red-400' :
-                               'bg-gray-50 border-gray-400';
-                
-                const icon = field.status === 'match' ? '✅' :
-                            field.status === 'mismatch' ? '❌' :
-                            '⚠️';
-                
-                const textColor = field.status === 'match' ? 'text-green-900' :
-                                 field.status === 'mismatch' ? 'text-red-900' :
-                                 'text-gray-700';
-
-                html += `
-                    <div class="border-2 ${bgColor} rounded-lg p-4">
-                        <div class="flex items-start justify-between mb-3">
-                            <div class="flex items-center gap-2">
-                                <span class="text-2xl">${icon}</span>
-                                <span class="font-bold ${textColor} text-lg capitalize">${field.field}</span>
-                            </div>
-                            ${field.similarity > 0 ? `<span class="text-xs px-2 py-1 bg-white rounded">${(field.similarity * 100).toFixed(0)}% similar</span>` : ''}
+            // Fill field details
+            let fieldHtml = '<div class="space-y-3">';
+            results.fieldResults.forEach(field => {
+                const color = field.match ? 'green' : 'red';
+                const icon = field.match ? '✅' : '❌';
+                fieldHtml += `
+                    <div class="border-2 border-${color}-300 bg-${color}-50 rounded-lg p-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-2xl">${icon}</span>
+                            <span class="font-bold text-${color}-900">${field.name}</span>
+                            <span class="text-xs bg-white px-2 py-1 rounded ml-auto">${Math.round(field.similarity * 100)}%</span>
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-white p-3 rounded">
-                                <p class="text-xs text-gray-600 mb-1">System:</p>
-                                <p class="font-mono font-bold ${textColor}">${field.systemValue}</p>
+                        <div class="grid grid-cols-2 gap-3 text-sm">
+                            <div class="bg-white p-2 rounded">
+                                <p class="text-xs text-gray-600">System:</p>
+                                <p class="font-mono font-bold">${field.system}</p>
                             </div>
-                            <div class="bg-white p-3 rounded">
-                                <p class="text-xs text-gray-600 mb-1">Label:</p>
-                                <p class="font-mono font-bold ${textColor}">${field.labelValue}</p>
+                            <div class="bg-white p-2 rounded">
+                                <p class="text-xs text-gray-600">Label:</p>
+                                <p class="font-mono font-bold">${field.label}</p>
                             </div>
                         </div>
-                        ${field.status === 'mismatch' ? '<p class="text-red-700 font-semibold mt-2 text-sm">⚠️ MISMATCH DETECTED</p>' : ''}
-                        ${field.status === 'missing' ? '<p class="text-gray-600 text-sm mt-2">Field missing in one of the sources</p>' : ''}
                     </div>
                 `;
             });
-            
-            html += '</div>';
-            fieldDiv.innerHTML = html;
+            fieldHtml += '</div>';
+            document.getElementById('fieldDetails').innerHTML = fieldHtml;
         }
 
         function downloadReport() {
             if (!comparisonResults) return;
 
-            const timestamp = new Date().toLocaleString('nl-NL');
             let report = `ORDER VERIFICATION REPORT\n`;
-            report += `Generated: ${timestamp}\n`;
-            report += `${'='.repeat(80)}\n\n`;
+            report += `${('=').repeat(60)}\n\n`;
 
-            // Order Status
-            report += `ORDER NUMBER VERIFICATION:\n${'-'.repeat(80)}\n`;
-            if (comparisonResults.orderMatch) {
-                report += `✓ SAME ORDER\n`;
-                report += `  System: ${comparisonResults.orderMatch.system}\n`;
-                report += `  Label:  ${comparisonResults.orderMatch.label}\n`;
-                report += `  Match:  ${(comparisonResults.orderSimilarity * 100).toFixed(1)}%\n\n`;
+            if (!comparisonResults.orderMatch) {
+                report += `STATUS: FAILED - WRONG ORDER\n\n`;
+                report += `Order number mismatch\n`;
+                report += `System: ${comparisonResults.systemData.orderNumber || 'Not found'}\n`;
+                report += `Label:  ${comparisonResults.labelData.orderNumber || 'Not found'}\n\n`;
+                report += `ACTION: DO NOT SHIP\n`;
             } else {
-                report += `✗ DIFFERENT ORDERS - DO NOT SHIP!\n`;
-                report += `  System: ${comparisonResults.systemOrders.join(', ') || 'None'}\n`;
-                report += `  Label:  ${comparisonResults.labelOrders.join(', ') || 'None'}\n\n`;
+                const mismatches = comparisonResults.fieldResults.filter(f => !f.match);
+                
+                if (mismatches.length === 0) {
+                    report += `STATUS: PASSED\n\n`;
+                    report += `Order: ${comparisonResults.orderMatch.system}\n`;
+                    report += `All fields verified ✓\n\n`;
+                    report += `ACTION: SAFE TO SHIP\n`;
+                } else {
+                    report += `STATUS: WARNING - MISMATCHES FOUND\n\n`;
+                    report += `Order: ${comparisonResults.orderMatch.system} ✓\n\n`;
+                    report += `MISMATCHES:\n`;
+                    mismatches.forEach(m => {
+                        report += `- ${m.name}\n`;
+                        report += `  System: ${m.system}\n`;
+                        report += `  Label:  ${m.label}\n\n`;
+                    });
+                    report += `ACTION: VERIFY BEFORE SHIPPING\n`;
+                }
             }
 
-            // Field Comparisons
-            if (comparisonResults.orderMatch && comparisonResults.fieldComparisons.length > 0) {
-                report += `FIELD-BY-FIELD COMPARISON:\n${'-'.repeat(80)}\n`;
-                comparisonResults.fieldComparisons.forEach(field => {
-                    const status = field.status === 'match' ? '✓' : field.status === 'mismatch' ? '✗' : '⚠';
-                    report += `${status} ${field.field.toUpperCase()}\n`;
-                    report += `  System: ${field.systemValue}\n`;
-                    report += `  Label:  ${field.labelValue}\n`;
-                    report += `  Status: ${field.status.toUpperCase()}\n\n`;
-                });
-            }
-
-            // Raw Data
-            report += `\nRAW EXTRACTED TEXT:\n${'-'.repeat(80)}\n`;
-            report += `SYSTEM:\n${systemText}\n\n`;
-            report += `LABEL:\n${labelText}\n\n`;
-
-            report += `${'='.repeat(80)}\n`;
-            report += `FlowCargo AI - Smart Order Verification\n`;
+            report += `\n${('=').repeat(60)}\n`;
+            report += `Generated: ${new Date().toLocaleString()}\n`;
 
             const blob = new Blob([report], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `order-verification-${Date.now()}.txt`;
+            a.download = `verification-${Date.now()}.txt`;
             a.click();
             URL.revokeObjectURL(url);
         }
@@ -615,12 +605,14 @@
             systemText = '';
             labelText = '';
             comparisonResults = null;
+            detailsVisible = false;
             
             document.getElementById('systemPreview').classList.add('hidden');
             document.getElementById('systemPlaceholder').classList.remove('hidden');
             document.getElementById('labelPreview').classList.add('hidden');
             document.getElementById('labelPlaceholder').classList.remove('hidden');
             document.getElementById('results').classList.add('hidden');
+            document.getElementById('detailsContent').classList.add('hidden');
             document.getElementById('processingStatus').classList.add('hidden');
             document.getElementById('systemImage').value = '';
             document.getElementById('labelImage').value = '';
