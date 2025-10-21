@@ -18,22 +18,10 @@
             height: 40px;
             animation: spin 1s linear infinite;
         }
-        .comparison-match {
-            background: #ecfdf5;
-            border: 2px solid #10b981;
-        }
-        .comparison-mismatch {
-            background: #fef2f2;
-            border: 2px solid #ef4444;
-        }
-        .comparison-warning {
-            background: #fffbeb;
-            border: 2px solid #f59e0b;
-        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
-    <div class="max-w-4xl mx-auto p-6">
+    <div class="max-w-5xl mx-auto p-6">
         <!-- Header -->
         <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
             <div class="flex items-center gap-3 mb-2">
@@ -41,32 +29,20 @@
                     <span class="text-white font-bold text-xl">✓</span>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Order Verification Tool</h1>
-                    <p class="text-gray-600 text-sm">Enhanced OCR with handwriting support</p>
+                    <h1 class="text-2xl font-bold text-gray-900">Smart Order Verification</h1>
+                    <p class="text-gray-600 text-sm">Intelligent field-by-field comparison</p>
                 </div>
             </div>
         </div>
 
-        <!-- Tips for better results -->
-        <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded">
-            <h3 class="font-bold text-green-900 mb-2">💡 Tips for Better Accuracy:</h3>
-            <ul class="text-sm text-green-800 space-y-1 ml-4 list-disc">
-                <li><strong>Good lighting</strong> - Make sure text is clearly visible</li>
-                <li><strong>Straight angle</strong> - Take photo directly above label (not tilted)</li>
-                <li><strong>Close up</strong> - Fill frame with the label/text</li>
-                <li><strong>Clear handwriting</strong> - If handwritten, ensure it's legible</li>
-                <li><strong>High resolution</strong> - Use good camera quality</li>
-            </ul>
-        </div>
-
-        <!-- Instructions -->
+        <!-- How It Works -->
         <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded">
-            <h3 class="font-bold text-blue-900 mb-2">📋 How it works:</h3>
+            <h3 class="font-bold text-blue-900 mb-2">🧠 How It Works:</h3>
             <ol class="text-sm text-blue-800 space-y-1 ml-4 list-decimal">
-                <li><strong>Primary Key:</strong> Order number/ID is the main identifier</li>
-                <li>Upload system screenshot and label photo</li>
-                <li>AI extracts order numbers first, then compares other details</li>
-                <li>Fuzzy matching handles typos and OCR errors</li>
+                <li><strong>Step 1:</strong> Extracts order number from both images (primary key)</li>
+                <li><strong>Step 2:</strong> Confirms both images are for the SAME order</li>
+                <li><strong>Step 3:</strong> Compares ALL fields dynamically (location, quantity, address, etc.)</li>
+                <li><strong>Step 4:</strong> Reports ANY differences found between system and label</li>
             </ol>
         </div>
 
@@ -74,16 +50,16 @@
         <div class="grid md:grid-cols-2 gap-6 mb-6">
             <!-- System Screenshot -->
             <div class="bg-white rounded-lg shadow-lg p-6">
-                <h2 class="text-lg font-bold text-gray-900 mb-4">1️⃣ System Screenshot</h2>
+                <h2 class="text-lg font-bold text-gray-900 mb-4">1️⃣ System Order</h2>
                 <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition cursor-pointer" onclick="document.getElementById('systemImage').click()">
                     <div id="systemPreview" class="hidden">
                         <img id="systemImg" class="max-h-64 mx-auto rounded mb-4 object-contain">
-                        <p class="text-sm text-gray-600 mb-2">Screenshot uploaded ✓</p>
+                        <p class="text-sm text-gray-600 mb-2">System screenshot uploaded ✓</p>
                     </div>
                     <div id="systemPlaceholder">
                         <div class="text-4xl mb-2">🖥️</div>
-                        <p class="text-gray-600 font-semibold mb-1">Upload System Screenshot</p>
-                        <p class="text-sm text-gray-500">Order details from your system</p>
+                        <p class="text-gray-600 font-semibold mb-1">System Screenshot</p>
+                        <p class="text-sm text-gray-500">Order info from your system</p>
                     </div>
                 </div>
                 <input type="file" id="systemImage" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'system')">
@@ -94,7 +70,7 @@
 
             <!-- Physical Label Photo -->
             <div class="bg-white rounded-lg shadow-lg p-6">
-                <h2 class="text-lg font-bold text-gray-900 mb-4">2️⃣ Physical Label Photo</h2>
+                <h2 class="text-lg font-bold text-gray-900 mb-4">2️⃣ Physical Label</h2>
                 <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-green-400 transition cursor-pointer" onclick="document.getElementById('labelImage').click()">
                     <div id="labelPreview" class="hidden">
                         <img id="labelImg" class="max-h-64 mx-auto rounded mb-4 object-contain">
@@ -102,8 +78,8 @@
                     </div>
                     <div id="labelPlaceholder">
                         <div class="text-4xl mb-2">📦</div>
-                        <p class="text-gray-600 font-semibold mb-1">Upload Box Label Photo</p>
-                        <p class="text-sm text-gray-500">Printed or handwritten label</p>
+                        <p class="text-gray-600 font-semibold mb-1">Physical Label</p>
+                        <p class="text-sm text-gray-500">Photo of the actual box label</p>
                     </div>
                 </div>
                 <input type="file" id="labelImage" accept="image/*" capture="environment" class="hidden" onchange="handleImageUpload(event, 'label')">
@@ -125,8 +101,8 @@
             <div class="flex items-center gap-4">
                 <div class="spinner"></div>
                 <div class="flex-1">
-                    <p class="text-blue-900 font-semibold text-lg">Processing images...</p>
-                    <p id="statusText" class="text-blue-700 text-sm mt-1">Initializing enhanced OCR...</p>
+                    <p class="text-blue-900 font-semibold text-lg">Processing...</p>
+                    <p id="statusText" class="text-blue-700 text-sm mt-1">Reading images...</p>
                     <div class="mt-3 bg-blue-200 h-2 rounded-full overflow-hidden">
                         <div id="progressBar" class="bg-blue-600 h-full transition-all duration-300" style="width: 0%"></div>
                     </div>
@@ -136,37 +112,29 @@
 
         <!-- Results Section -->
         <div id="results" class="hidden">
-            <!-- Primary Key Status -->
-            <div id="primaryKeyStatus" class="mb-6"></div>
+            <!-- Order Verification Status -->
+            <div id="orderStatus" class="mb-6"></div>
 
-            <!-- Overall Status -->
-            <div id="overallStatus" class="mb-6"></div>
-
-            <!-- Extracted Data -->
+            <!-- Extracted Text Preview -->
             <div class="grid md:grid-cols-2 gap-6 mb-6">
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <span class="text-blue-600">🖥️</span> System Data Extracted
+                <div class="bg-white rounded-lg shadow-lg p-4">
+                    <h3 class="font-bold text-gray-900 mb-3 text-sm flex items-center gap-2">
+                        <span class="text-blue-600">🖥️</span> System Text
                     </h3>
-                    <pre id="systemData" class="bg-gray-50 p-4 rounded text-xs font-mono overflow-auto max-h-64 whitespace-pre-wrap border border-gray-200"></pre>
+                    <pre id="systemData" class="bg-gray-50 p-3 rounded text-xs font-mono overflow-auto max-h-48 whitespace-pre-wrap border border-gray-200"></pre>
                 </div>
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <span class="text-green-600">📦</span> Label Data Extracted
+                <div class="bg-white rounded-lg shadow-lg p-4">
+                    <h3 class="font-bold text-gray-900 mb-3 text-sm flex items-center gap-2">
+                        <span class="text-green-600">📦</span> Label Text
                     </h3>
-                    <pre id="labelData" class="bg-gray-50 p-4 rounded text-xs font-mono overflow-auto max-h-64 whitespace-pre-wrap border border-gray-200"></pre>
+                    <pre id="labelData" class="bg-gray-50 p-3 rounded text-xs font-mono overflow-auto max-h-48 whitespace-pre-wrap border border-gray-200"></pre>
                 </div>
             </div>
 
-            <!-- Comparison Results -->
+            <!-- Field-by-Field Comparison -->
             <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-                <h3 class="font-bold text-gray-900 mb-4 text-xl">🔍 Detailed Comparison</h3>
-                
-                <!-- Match Percentage -->
-                <div id="matchPercentage" class="mb-6"></div>
-
-                <!-- Detected Fields -->
-                <div id="detectedFields"></div>
+                <h3 class="font-bold text-gray-900 mb-4 text-xl">📊 Field-by-Field Comparison</h3>
+                <div id="fieldComparison"></div>
             </div>
 
             <!-- Actions -->
@@ -176,9 +144,6 @@
                 </button>
                 <button onclick="downloadReport()" class="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
                     📥 Download Report
-                </button>
-                <button onclick="copyToClipboard()" class="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition">
-                    📋 Copy Results
                 </button>
             </div>
         </div>
@@ -213,7 +178,7 @@
                     const btn = document.getElementById('compareBtn');
                     btn.disabled = false;
                     btn.className = 'bg-blue-600 text-white px-12 py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-all shadow-lg cursor-pointer';
-                    btn.textContent = '🔍 Compare with Enhanced OCR';
+                    btn.textContent = '🔍 Compare Orders';
                 }
             };
             reader.readAsDataURL(file);
@@ -226,56 +191,41 @@
             }
         }
 
-        // Levenshtein distance for fuzzy matching
-        function levenshteinDistance(str1, str2) {
-            const m = str1.length;
-            const n = str2.length;
-            const dp = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+        // Fuzzy string matching (Levenshtein distance)
+        function similarity(s1, s2) {
+            s1 = s1.toLowerCase().trim();
+            s2 = s2.toLowerCase().trim();
+            
+            if (s1 === s2) return 1.0;
+            
+            const longer = s1.length > s2.length ? s1 : s2;
+            const shorter = s1.length > s2.length ? s2 : s1;
+            
+            if (longer.length === 0) return 1.0;
+            
+            const editDistance = levenshteinDistance(longer, shorter);
+            return (longer.length - editDistance) / longer.length;
+        }
 
-            for (let i = 0; i <= m; i++) dp[i][0] = i;
-            for (let j = 0; j <= n; j++) dp[0][j] = j;
-
-            for (let i = 1; i <= m; i++) {
-                for (let j = 1; j <= n; j++) {
-                    if (str1[i - 1] === str2[j - 1]) {
-                        dp[i][j] = dp[i - 1][j - 1];
-                    } else {
-                        dp[i][j] = Math.min(
-                            dp[i - 1][j - 1] + 1,
-                            dp[i - 1][j] + 1,
-                            dp[i][j - 1] + 1
-                        );
+        function levenshteinDistance(s1, s2) {
+            const costs = [];
+            for (let i = 0; i <= s1.length; i++) {
+                let lastValue = i;
+                for (let j = 0; j <= s2.length; j++) {
+                    if (i === 0) {
+                        costs[j] = j;
+                    } else if (j > 0) {
+                        let newValue = costs[j - 1];
+                        if (s1.charAt(i - 1) !== s2.charAt(j - 1)) {
+                            newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+                        }
+                        costs[j - 1] = lastValue;
+                        lastValue = newValue;
                     }
                 }
+                if (i > 0) costs[s2.length] = lastValue;
             }
-            return dp[m][n];
-        }
-
-        function fuzzyMatch(str1, str2, threshold = 0.8) {
-            if (!str1 || !str2) return { match: false, similarity: 0 };
-            
-            str1 = str1.toLowerCase().trim();
-            str2 = str2.toLowerCase().trim();
-
-            // Exact match
-            if (str1 === str2) return { match: true, similarity: 1.0 };
-
-            // Calculate similarity
-            const maxLen = Math.max(str1.length, str2.length);
-            const distance = levenshteinDistance(str1, str2);
-            const similarity = 1 - (distance / maxLen);
-
-            return {
-                match: similarity >= threshold,
-                similarity: similarity
-            };
-        }
-
-        function normalizeOrderNumber(text) {
-            // Remove common prefixes and normalize
-            return text.replace(/^(order|ord|nr|#|nummer)[\s:.-]*/i, '')
-                      .replace(/[^a-z0-9]/gi, '')
-                      .toUpperCase();
+            return costs[s2.length];
         }
 
         async function compareImages() {
@@ -283,23 +233,20 @@
             document.getElementById('results').classList.add('hidden');
 
             try {
-                // Extract text from system screenshot with image preprocessing
-                updateStatus('Reading system screenshot with enhanced OCR...', 10);
+                updateStatus('Reading system screenshot...', 10);
                 systemText = await extractText(systemImageData, 'system');
                 document.getElementById('systemData').textContent = systemText || 'No text detected';
-                updateStatus('System screenshot processed ✓', 50);
+                updateStatus('System processed ✓', 50);
 
-                // Extract text from label photo with handwriting support
-                updateStatus('Reading label photo (handwriting support enabled)...', 50);
+                updateStatus('Reading label photo...', 50);
                 labelText = await extractText(labelImageData, 'label');
                 document.getElementById('labelData').textContent = labelText || 'No text detected';
-                updateStatus('Label photo processed ✓', 90);
+                updateStatus('Label processed ✓', 90);
 
-                // Compare with primary key logic
-                updateStatus('Comparing using order number as primary key...', 95);
+                updateStatus('Analyzing and comparing...', 95);
                 await new Promise(resolve => setTimeout(resolve, 500));
                 
-                comparisonResults = compareTextsWithPrimaryKey(systemText, labelText);
+                comparisonResults = intelligentCompare(systemText, labelText);
                 displayResults(comparisonResults);
                 
                 updateStatus('Complete!', 100);
@@ -309,27 +256,15 @@
                 }, 500);
 
             } catch (error) {
-                console.error('Error during comparison:', error);
+                console.error('Error:', error);
                 updateStatus('Error: ' + error.message, 0);
-                alert('Error processing images. Please try with better lighting and clearer photos.');
+                alert('Error processing images. Please try again.');
                 document.getElementById('processingStatus').classList.add('hidden');
             }
         }
 
         async function extractText(imageData, source) {
             try {
-                // Use different OCR settings based on source
-                const config = source === 'label' 
-                    ? { 
-                        // Better for handwriting and low quality
-                        tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-/:., ',
-                        tessedit_pageseg_mode: Tesseract.PSM.AUTO
-                      }
-                    : {
-                        // Standard for printed text
-                        tessedit_pageseg_mode: Tesseract.PSM.AUTO
-                      };
-
                 const result = await Tesseract.recognize(
                     imageData,
                     'eng+nld',
@@ -341,391 +276,287 @@
                                     : 50 + (info.progress * 40);
                                 updateStatus(`Reading ${source}: ${Math.round(info.progress * 100)}%`, progress);
                             }
-                        },
-                        ...config
+                        }
                     }
                 );
                 return result.data.text;
             } catch (error) {
-                console.error('OCR Error:', error);
-                throw new Error('Failed to read text from ' + source + ' image');
+                throw new Error('Failed to read ' + source + ' image');
             }
         }
 
-        function compareTextsWithPrimaryKey(system, label) {
-            // STEP 1: Extract order numbers (PRIMARY KEY)
-            const orderPatterns = [
-                /(?:order|ord|nr|nummer|#)\s*:?\s*([A-Z0-9-]+)/gi,
-                /\b([A-Z]{2,4}[-]?\d{3,})\b/g,  // Pattern like ORD-123, AB123
-                /\b(\d{5,})\b/g  // Long numbers might be order IDs
-            ];
+        function intelligentCompare(systemText, labelText) {
+            // STEP 1: Parse both texts into structured data
+            const systemData = parseOrderData(systemText);
+            const labelData = parseOrderData(labelText);
 
-            let systemOrders = [];
-            let labelOrders = [];
+            // STEP 2: Find order number match (PRIMARY KEY)
+            let orderMatch = null;
+            let orderSimilarity = 0;
 
-            orderPatterns.forEach(pattern => {
-                const sysMatches = [...system.matchAll(pattern)].map(m => m[1] || m[0]);
-                const lblMatches = [...label.matchAll(pattern)].map(m => m[1] || m[0]);
-                systemOrders.push(...sysMatches);
-                labelOrders.push(...lblMatches);
-            });
-
-            // Remove duplicates and normalize
-            systemOrders = [...new Set(systemOrders)].map(normalizeOrderNumber);
-            labelOrders = [...new Set(labelOrders)].map(normalizeOrderNumber);
-
-            // STEP 2: Find PRIMARY KEY match
-            let primaryKeyMatch = null;
-            let primaryKeySimilarity = 0;
-
-            for (const sysOrder of systemOrders) {
-                for (const lblOrder of labelOrders) {
-                    const fuzzy = fuzzyMatch(sysOrder, lblOrder, 0.75);
-                    if (fuzzy.similarity > primaryKeySimilarity) {
-                        primaryKeySimilarity = fuzzy.similarity;
-                        if (fuzzy.match) {
-                            primaryKeyMatch = {
+            for (const sysOrder of systemData.orderNumbers) {
+                for (const lblOrder of labelData.orderNumbers) {
+                    const sim = similarity(sysOrder, lblOrder);
+                    if (sim > orderSimilarity) {
+                        orderSimilarity = sim;
+                        if (sim >= 0.75) {
+                            orderMatch = {
                                 system: sysOrder,
                                 label: lblOrder,
-                                similarity: fuzzy.similarity
+                                similarity: sim
                             };
                         }
                     }
                 }
             }
 
-            // STEP 3: Extract other fields
-            const patterns = {
-                quantity: /(?:qty|quantity|aantal|stuks|pcs)\s*:?\s*(\d+)/gi,
-                date: /\b\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4}\b/g,
-                postal: /\b\d{4}\s?[A-Z]{2}\b/g,
-                weight: /(?:weight|gewicht)\s*:?\s*(\d+(?:\.\d+)?)\s*(?:kg|g)/gi,
-                destination: /(?:to|naar|destination)\s*:?\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/gi
-            };
+            // STEP 3: If orders match, compare ALL fields dynamically
+            const fieldComparisons = [];
 
-            const systemData = extractPatterns(system, patterns);
-            const labelData = extractPatterns(label, patterns);
+            if (orderMatch) {
+                // Compare all detected fields
+                const allFieldTypes = new Set([
+                    ...Object.keys(systemData.fields),
+                    ...Object.keys(labelData.fields)
+                ]);
 
-            const matches = [];
-            const mismatches = [];
-            const warnings = [];
+                allFieldTypes.forEach(fieldType => {
+                    const sysValues = systemData.fields[fieldType] || [];
+                    const lblValues = labelData.fields[fieldType] || [];
 
-            // STEP 4: Compare fields only if primary key matches
-            if (primaryKeyMatch) {
-                // Compare quantities with fuzzy matching
-                if (systemData.quantity.length > 0 && labelData.quantity.length > 0) {
-                    const sysQty = systemData.quantity[0];
-                    const lblQty = labelData.quantity[0];
-                    
-                    if (sysQty === lblQty) {
-                        matches.push({
-                            field: 'Quantity',
-                            value: sysQty,
-                            confidence: 'high'
-                        });
-                    } else {
-                        // Check if close (OCR might misread 8 as 3, etc.)
-                        const diff = Math.abs(parseInt(sysQty) - parseInt(lblQty));
-                        if (diff <= 2) {
-                            warnings.push({
-                                field: 'Quantity',
-                                system: sysQty,
-                                label: lblQty,
-                                note: 'Close match - possible OCR error',
-                                severity: 'medium'
-                            });
-                        } else {
-                            mismatches.push({
-                                field: 'Quantity',
-                                system: sysQty,
-                                label: lblQty,
-                                severity: 'high'
-                            });
-                        }
-                    }
-                }
+                    if (sysValues.length === 0 && lblValues.length === 0) return;
 
-                // Compare dates
-                if (systemData.date.length > 0 && labelData.date.length > 0) {
-                    const commonDates = systemData.date.filter(d => labelData.date.includes(d));
-                    if (commonDates.length > 0) {
-                        matches.push({
-                            field: 'Date',
-                            value: commonDates[0],
-                            confidence: 'high'
-                        });
-                    }
-                }
+                    // Try to match values
+                    let matched = false;
+                    let bestMatch = null;
+                    let bestSim = 0;
 
-                // Compare postal codes with fuzzy matching
-                if (systemData.postal.length > 0 && labelData.postal.length > 0) {
-                    let foundMatch = false;
-                    for (const sysPostal of systemData.postal) {
-                        for (const lblPostal of labelData.postal) {
-                            const fuzzy = fuzzyMatch(sysPostal, lblPostal, 0.85);
-                            if (fuzzy.match) {
-                                matches.push({
-                                    field: 'Postal Code',
-                                    value: sysPostal,
-                                    confidence: fuzzy.similarity > 0.95 ? 'high' : 'medium'
-                                });
-                                foundMatch = true;
-                                break;
+                    for (const sysVal of sysValues) {
+                        for (const lblVal of lblValues) {
+                            const sim = similarity(sysVal, lblVal);
+                            if (sim > bestSim) {
+                                bestSim = sim;
+                                bestMatch = { sysVal, lblVal, sim };
+                                if (sim >= 0.85) matched = true;
                             }
                         }
-                        if (foundMatch) break;
                     }
-                }
 
-                // Compare destinations with fuzzy matching
-                if (systemData.destination.length > 0 && labelData.destination.length > 0) {
-                    let foundMatch = false;
-                    for (const sysDest of systemData.destination) {
-                        for (const lblDest of labelData.destination) {
-                            const fuzzy = fuzzyMatch(sysDest, lblDest, 0.8);
-                            if (fuzzy.match) {
-                                matches.push({
-                                    field: 'Destination',
-                                    value: sysDest,
-                                    confidence: fuzzy.similarity > 0.95 ? 'high' : 'medium'
-                                });
-                                foundMatch = true;
-                                break;
-                            }
-                        }
-                        if (foundMatch) break;
-                    }
-                }
+                    fieldComparisons.push({
+                        field: fieldType,
+                        systemValue: sysValues.join(', ') || 'Not found',
+                        labelValue: lblValues.join(', ') || 'Not found',
+                        matched: matched,
+                        similarity: bestSim,
+                        status: matched ? 'match' : (sysValues.length === 0 || lblValues.length === 0) ? 'missing' : 'mismatch'
+                    });
+                });
             }
 
-            // Calculate overall text similarity
-            const systemWords = new Set(system.toLowerCase().match(/\b[a-z0-9]{3,}\b/g) || []);
-            const labelWords = new Set(label.toLowerCase().match(/\b[a-z0-9]{3,}\b/g) || []);
-            const commonWords = [...systemWords].filter(w => labelWords.has(w));
-            const matchPercentage = systemWords.size > 0 
-                ? Math.round((commonWords.length / Math.max(systemWords.size, labelWords.size)) * 100)
-                : 0;
-
             return {
-                primaryKeyMatch,
-                primaryKeySimilarity,
-                systemOrders,
-                labelOrders,
-                matches,
-                mismatches,
-                warnings,
-                matchPercentage,
-                commonWords,
-                systemData,
-                labelData
+                orderMatch,
+                orderSimilarity,
+                systemOrders: systemData.orderNumbers,
+                labelOrders: labelData.orderNumbers,
+                fieldComparisons,
+                systemAllFields: systemData.fields,
+                labelAllFields: labelData.fields
             };
         }
 
-        function extractPatterns(text, patterns) {
-            const result = {};
-            for (const [key, pattern] of Object.entries(patterns)) {
+        function parseOrderData(text) {
+            const data = {
+                orderNumbers: [],
+                fields: {}
+            };
+
+            // Extract order numbers (multiple patterns)
+            const orderPatterns = [
+                /(?:order|ord|#|nr|nummer)\s*:?\s*([A-Z0-9-]+)/gi,
+                /\b([A-Z]{2,4}[-]?\d{3,})\b/g,
+                /\b(\d{5,})\b/g
+            ];
+
+            orderPatterns.forEach(pattern => {
                 const matches = [...text.matchAll(pattern)].map(m => m[1] || m[0]);
-                result[key] = [...new Set(matches)];
-            }
-            return result;
+                data.orderNumbers.push(...matches);
+            });
+            data.orderNumbers = [...new Set(data.orderNumbers)].map(o => o.replace(/[^a-z0-9]/gi, '').toUpperCase());
+
+            // Extract location/destination
+            const locationPatterns = [
+                /(?:location|loc|locatie|plaats)\s*:?\s*([^\n\r,;]{3,30})/gi,
+                /(?:destination|bestemming|naar|to)\s*:?\s*([^\n\r,;]{3,30})/gi,
+                /(?:city|stad|plaats)\s*:?\s*([A-Za-z\s]+)/gi
+            ];
+            data.fields.location = [];
+            locationPatterns.forEach(pattern => {
+                const matches = [...text.matchAll(pattern)].map(m => m[1].trim());
+                data.fields.location.push(...matches);
+            });
+            data.fields.location = [...new Set(data.fields.location)];
+
+            // Extract quantity
+            const qtyPatterns = [
+                /(?:qty|quantity|aantal|stuks|pcs|pieces)\s*:?\s*(\d+)/gi,
+                /(\d+)\s*(?:pcs|stuks|pieces|units)/gi
+            ];
+            data.fields.quantity = [];
+            qtyPatterns.forEach(pattern => {
+                const matches = [...text.matchAll(pattern)].map(m => m[1]);
+                data.fields.quantity.push(...matches);
+            });
+            data.fields.quantity = [...new Set(data.fields.quantity)];
+
+            // Extract address components
+            data.fields.address = [];
+            const addressPattern = /(?:address|adres|straat|street)\s*:?\s*([^\n\r]{5,50})/gi;
+            const matches = [...text.matchAll(addressPattern)].map(m => m[1].trim());
+            data.fields.address.push(...matches);
+
+            // Extract postal codes
+            data.fields.postal = [];
+            const postalPattern = /\b\d{4}\s?[A-Z]{2}\b/g;
+            const postalMatches = text.match(postalPattern) || [];
+            data.fields.postal.push(...postalMatches);
+
+            // Extract dates
+            data.fields.date = [];
+            const datePattern = /\b\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4}\b/g;
+            const dateMatches = text.match(datePattern) || [];
+            data.fields.date.push(...dateMatches);
+
+            // Extract any field with ":" pattern (dynamic)
+            const genericPattern = /([A-Za-z]{3,20})\s*:\s*([^\n\r:]{2,40})/g;
+            const genericMatches = [...text.matchAll(genericPattern)];
+            genericMatches.forEach(match => {
+                const fieldName = match[1].toLowerCase().trim();
+                const fieldValue = match[2].trim();
+                
+                // Skip if already captured
+                if (['order', 'qty', 'quantity', 'location', 'address', 'date'].includes(fieldName)) return;
+                
+                if (!data.fields[fieldName]) {
+                    data.fields[fieldName] = [];
+                }
+                data.fields[fieldName].push(fieldValue);
+            });
+
+            return data;
         }
 
         function displayResults(results) {
-            // PRIMARY KEY STATUS (Most Important!)
-            const primaryKeyDiv = document.getElementById('primaryKeyStatus');
-            if (results.primaryKeyMatch) {
-                const confidence = results.primaryKeySimilarity * 100;
-                primaryKeyDiv.innerHTML = `
-                    <div class="border-2 rounded-lg p-6 ${confidence > 95 ? 'bg-green-50 border-green-500' : 'bg-yellow-50 border-yellow-500'}">
+            // Order Status
+            const orderStatusDiv = document.getElementById('orderStatus');
+            
+            if (!results.orderMatch) {
+                orderStatusDiv.innerHTML = `
+                    <div class="border-4 bg-red-50 border-red-600 rounded-lg p-6">
                         <div class="flex items-center gap-4">
-                            <div class="text-5xl">${confidence > 95 ? '🔑✅' : '🔑⚠️'}</div>
+                            <div class="text-6xl">🚫</div>
                             <div class="flex-1">
-                                <h4 class="text-xl font-bold ${confidence > 95 ? 'text-green-900' : 'text-yellow-900'}">
-                                    Primary Key: Order Number ${confidence > 95 ? 'Verified' : 'Partial Match'}
+                                <h4 class="text-2xl font-bold text-red-900 mb-2">WRONG ORDER!</h4>
+                                <p class="text-red-700 font-semibold">System and label are for DIFFERENT orders</p>
+                                <div class="grid grid-cols-2 gap-4 mt-4 text-sm bg-white p-3 rounded">
+                                    <div>
+                                        <span class="text-gray-600">System Orders:</span>
+                                        <div class="font-mono font-bold text-red-900">${results.systemOrders.join(', ') || 'None found'}</div>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-600">Label Orders:</span>
+                                        <div class="font-mono font-bold text-red-900">${results.labelOrders.join(', ') || 'None found'}</div>
+                                    </div>
+                                </div>
+                                <p class="text-red-800 font-bold mt-3 text-lg">⚠️ DO NOT SHIP THIS BOX</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                const allMatched = results.fieldComparisons.every(f => f.status === 'match');
+                const hasMismatches = results.fieldComparisons.some(f => f.status === 'mismatch');
+                
+                orderStatusDiv.innerHTML = `
+                    <div class="border-4 ${allMatched ? 'bg-green-50 border-green-600' : 'bg-yellow-50 border-yellow-600'} rounded-lg p-6">
+                        <div class="flex items-center gap-4">
+                            <div class="text-6xl">${allMatched ? '✅' : '⚠️'}</div>
+                            <div class="flex-1">
+                                <h4 class="text-2xl font-bold ${allMatched ? 'text-green-900' : 'text-yellow-900'} mb-2">
+                                    Order Match: ${results.orderMatch.system}
                                 </h4>
-                                <div class="grid grid-cols-2 gap-4 mt-3 text-sm">
-                                    <div>
-                                        <span class="text-gray-600">System:</span>
-                                        <span class="font-mono font-bold ml-2">${results.primaryKeyMatch.system}</span>
-                                    </div>
-                                    <div>
-                                        <span class="text-gray-600">Label:</span>
-                                        <span class="font-mono font-bold ml-2">${results.primaryKeyMatch.label}</span>
-                                    </div>
-                                </div>
-                                <p class="text-xs mt-2 ${confidence > 95 ? 'text-green-700' : 'text-yellow-700'}">
-                                    Match confidence: ${confidence.toFixed(1)}%
-                                    ${confidence <= 95 ? ' - May be OCR error or similar order number' : ''}
+                                <p class="${allMatched ? 'text-green-700' : 'text-yellow-700'} font-semibold">
+                                    System and label are for the SAME order (${(results.orderSimilarity * 100).toFixed(0)}% match)
                                 </p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else {
-                primaryKeyDiv.innerHTML = `
-                    <div class="border-2 bg-red-50 border-red-500 rounded-lg p-6">
-                        <div class="flex items-center gap-4">
-                            <div class="text-5xl">🔑❌</div>
-                            <div>
-                                <h4 class="text-xl font-bold text-red-900">Order Number Mismatch!</h4>
-                                <p class="text-red-700 text-sm mt-2">System and label appear to be different orders</p>
-                                <div class="grid grid-cols-2 gap-4 mt-3 text-sm">
-                                    <div>
-                                        <span class="text-gray-600">System found:</span>
-                                        <span class="font-mono font-bold ml-2">${results.systemOrders.join(', ') || 'None'}</span>
-                                    </div>
-                                    <div>
-                                        <span class="text-gray-600">Label found:</span>
-                                        <span class="font-mono font-bold ml-2">${results.labelOrders.join(', ') || 'None'}</span>
-                                    </div>
-                                </div>
+                                ${hasMismatches ? '<p class="text-red-700 font-bold mt-2 text-lg">⚠️ BUT there are differences in the details - see below</p>' : '<p class="text-green-700 font-bold mt-2">All details match perfectly ✓</p>'}
                             </div>
                         </div>
                     </div>
                 `;
             }
 
-            // Overall status
-            const overallDiv = document.getElementById('overallStatus');
-            const criticalIssues = results.mismatches.filter(m => m.severity === 'high').length;
-            const hasWarnings = results.warnings.length > 0;
+            // Field Comparisons
+            const fieldDiv = document.getElementById('fieldComparison');
             
-            if (results.primaryKeyMatch && criticalIssues === 0 && !hasWarnings) {
-                overallDiv.innerHTML = `
-                    <div class="border-2 bg-green-50 border-green-500 rounded-lg p-6">
-                        <div class="flex items-center gap-4">
-                            <div class="text-5xl">✅</div>
-                            <div>
-                                <h4 class="text-xl font-bold text-green-900">All Checks Passed!</h4>
-                                <p class="text-green-700">${results.matches.length} fields verified successfully</p>
-                            </div>
-                        </div>
+            if (!results.orderMatch) {
+                fieldDiv.innerHTML = `
+                    <div class="bg-gray-50 border border-gray-300 rounded p-4 text-center text-gray-600">
+                        Cannot compare fields - orders do not match
                     </div>
                 `;
-            } else if (results.primaryKeyMatch) {
-                overallDiv.innerHTML = `
-                    <div class="border-2 bg-yellow-50 border-yellow-500 rounded-lg p-6">
-                        <div class="flex items-center gap-4">
-                            <div class="text-5xl">⚠️</div>
-                            <div>
-                                <h4 class="text-xl font-bold text-yellow-900">Review Required</h4>
-                                <p class="text-yellow-700">
-                                    ${results.matches.length} matches, 
-                                    ${results.mismatches.length} mismatches, 
-                                    ${results.warnings.length} warnings
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else {
-                overallDiv.innerHTML = `
-                    <div class="border-2 bg-red-50 border-red-500 rounded-lg p-6">
-                        <div class="flex items-center gap-4">
-                            <div class="text-5xl">🚫</div>
-                            <div>
-                                <h4 class="text-xl font-bold text-red-900">Order Mismatch - Do Not Ship!</h4>
-                                <p class="text-red-700">System order and physical label do not match</p>
-                            </div>
-                        </div>
-                    </div>
-                `;
+                return;
             }
 
-            // Match percentage
-            const matchDiv = document.getElementById('matchPercentage');
-            const color = results.matchPercentage >= 70 ? 'green' : results.matchPercentage >= 40 ? 'yellow' : 'red';
-            matchDiv.innerHTML = `
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-sm font-semibold text-gray-700">Overall Text Similarity</span>
-                    <span class="text-sm font-bold text-${color}-600">${results.matchPercentage}%</span>
-                </div>
-                <div class="bg-gray-200 h-4 rounded-full overflow-hidden">
-                    <div class="h-full bg-${color}-500 transition-all" style="width: ${results.matchPercentage}%"></div>
-                </div>
-                <p class="text-xs text-gray-600 mt-1">${results.commonWords.length} common words found</p>
-            `;
+            if (results.fieldComparisons.length === 0) {
+                fieldDiv.innerHTML = `
+                    <div class="bg-gray-50 border border-gray-300 rounded p-4 text-center text-gray-600">
+                        No specific fields detected to compare. Review the extracted text above.
+                    </div>
+                `;
+                return;
+            }
 
-            // Detected fields
-            let fieldsHtml = '';
+            let html = '<div class="space-y-3">';
             
-            // Mismatches (Critical)
-            if (results.mismatches.length > 0) {
-                fieldsHtml += '<div class="mb-4"><h4 class="font-bold text-red-900 mb-3">❌ Critical Mismatches:</h4>';
-                results.mismatches.forEach(mismatch => {
-                    fieldsHtml += `
-                        <div class="comparison-mismatch rounded-lg p-4 mb-3">
-                            <p class="font-semibold text-gray-900 mb-2">${mismatch.field}</p>
-                            <div class="grid grid-cols-2 gap-4 text-sm">
-                                <div>
-                                    <span class="text-gray-600">System:</span>
-                                    <span class="font-mono font-bold ml-2 text-red-900">${mismatch.system}</span>
-                                </div>
-                                <div>
-                                    <span class="text-gray-600">Label:</span>
-                                    <span class="font-mono font-bold ml-2 text-red-900">${mismatch.label}</span>
-                                </div>
+            results.fieldComparisons.forEach(field => {
+                const bgColor = field.status === 'match' ? 'bg-green-50 border-green-400' :
+                               field.status === 'mismatch' ? 'bg-red-50 border-red-400' :
+                               'bg-gray-50 border-gray-400';
+                
+                const icon = field.status === 'match' ? '✅' :
+                            field.status === 'mismatch' ? '❌' :
+                            '⚠️';
+                
+                const textColor = field.status === 'match' ? 'text-green-900' :
+                                 field.status === 'mismatch' ? 'text-red-900' :
+                                 'text-gray-700';
+
+                html += `
+                    <div class="border-2 ${bgColor} rounded-lg p-4">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="text-2xl">${icon}</span>
+                                <span class="font-bold ${textColor} text-lg capitalize">${field.field}</span>
+                            </div>
+                            ${field.similarity > 0 ? `<span class="text-xs px-2 py-1 bg-white rounded">${(field.similarity * 100).toFixed(0)}% similar</span>` : ''}
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-white p-3 rounded">
+                                <p class="text-xs text-gray-600 mb-1">System:</p>
+                                <p class="font-mono font-bold ${textColor}">${field.systemValue}</p>
+                            </div>
+                            <div class="bg-white p-3 rounded">
+                                <p class="text-xs text-gray-600 mb-1">Label:</p>
+                                <p class="font-mono font-bold ${textColor}">${field.labelValue}</p>
                             </div>
                         </div>
-                    `;
-                });
-                fieldsHtml += '</div>';
-            }
-
-            // Warnings (Possible OCR errors)
-            if (results.warnings.length > 0) {
-                fieldsHtml += '<div class="mb-4"><h4 class="font-bold text-yellow-900 mb-3">⚠️ Warnings (Verify Manually):</h4>';
-                results.warnings.forEach(warning => {
-                    fieldsHtml += `
-                        <div class="comparison-warning rounded-lg p-4 mb-3">
-                            <p class="font-semibold text-gray-900 mb-2">${warning.field}</p>
-                            <div class="grid grid-cols-2 gap-4 text-sm mb-2">
-                                <div>
-                                    <span class="text-gray-600">System:</span>
-                                    <span class="font-mono font-bold ml-2 text-yellow-900">${warning.system}</span>
-                                </div>
-                                <div>
-                                    <span class="text-gray-600">Label:</span>
-                                    <span class="font-mono font-bold ml-2 text-yellow-900">${warning.label}</span>
-                                </div>
-                            </div>
-                            <p class="text-xs text-yellow-700 italic">💡 ${warning.note}</p>
-                        </div>
-                    `;
-                });
-                fieldsHtml += '</div>';
-            }
-
-            // Matches
-            if (results.matches.length > 0) {
-                fieldsHtml += '<div><h4 class="font-bold text-green-900 mb-3">✓ Verified Matches:</h4>';
-                results.matches.forEach(match => {
-                    const confidenceColor = match.confidence === 'high' ? 'green' : 'blue';
-                    fieldsHtml += `
-                        <div class="comparison-match rounded-lg p-3 mb-2 flex justify-between items-center">
-                            <div>
-                                <span class="text-gray-700 font-semibold">${match.field}:</span>
-                                <span class="font-mono font-bold ml-2 text-green-900">${match.value}</span>
-                            </div>
-                            <span class="text-xs px-2 py-1 bg-${confidenceColor}-200 text-${confidenceColor}-800 rounded">
-                                ${match.confidence} confidence
-                            </span>
-                        </div>
-                    `;
-                });
-                fieldsHtml += '</div>';
-            }
-
-            if (results.matches.length === 0 && results.mismatches.length === 0 && results.warnings.length === 0) {
-                fieldsHtml = `
-                    <div class="bg-gray-50 border-2 border-gray-300 rounded-lg p-6 text-center">
-                        <p class="text-gray-600 mb-2">Could not detect specific fields to compare.</p>
-                        <p class="text-sm text-gray-500">Check the extracted text above and verify manually, or try retaking photos with better lighting.</p>
+                        ${field.status === 'mismatch' ? '<p class="text-red-700 font-semibold mt-2 text-sm">⚠️ MISMATCH DETECTED</p>' : ''}
+                        ${field.status === 'missing' ? '<p class="text-gray-600 text-sm mt-2">Field missing in one of the sources</p>' : ''}
                     </div>
                 `;
-            }
-
-            document.getElementById('detectedFields').innerHTML = fieldsHtml;
+            });
+            
+            html += '</div>';
+            fieldDiv.innerHTML = html;
         }
 
         function downloadReport() {
@@ -736,74 +567,38 @@
             report += `Generated: ${timestamp}\n`;
             report += `${'='.repeat(80)}\n\n`;
 
-            // Primary Key Status
-            report += `PRIMARY KEY (ORDER NUMBER) STATUS:\n`;
-            report += `${'-'.repeat(80)}\n`;
-            if (comparisonResults.primaryKeyMatch) {
-                report += `✓ MATCH FOUND\n`;
-                report += `  System: ${comparisonResults.primaryKeyMatch.system}\n`;
-                report += `  Label:  ${comparisonResults.primaryKeyMatch.label}\n`;
-                report += `  Confidence: ${(comparisonResults.primaryKeySimilarity * 100).toFixed(1)}%\n`;
+            // Order Status
+            report += `ORDER NUMBER VERIFICATION:\n${'-'.repeat(80)}\n`;
+            if (comparisonResults.orderMatch) {
+                report += `✓ SAME ORDER\n`;
+                report += `  System: ${comparisonResults.orderMatch.system}\n`;
+                report += `  Label:  ${comparisonResults.orderMatch.label}\n`;
+                report += `  Match:  ${(comparisonResults.orderSimilarity * 100).toFixed(1)}%\n\n`;
             } else {
-                report += `✗ NO MATCH - DIFFERENT ORDERS\n`;
-                report += `  System found: ${comparisonResults.systemOrders.join(', ') || 'None'}\n`;
-                report += `  Label found:  ${comparisonResults.labelOrders.join(', ') || 'None'}\n`;
-            }
-            report += `\n`;
-
-            // Overall Status
-            const criticalIssues = comparisonResults.mismatches.filter(m => m.severity === 'high').length;
-            report += `OVERALL VERIFICATION STATUS:\n`;
-            report += `${'-'.repeat(80)}\n`;
-            if (comparisonResults.primaryKeyMatch && criticalIssues === 0 && comparisonResults.warnings.length === 0) {
-                report += `✓ PASSED - All checks verified\n`;
-            } else if (comparisonResults.primaryKeyMatch) {
-                report += `⚠ WARNING - Review required\n`;
-            } else {
-                report += `✗ FAILED - Do not ship!\n`;
-            }
-            report += `  Match Percentage: ${comparisonResults.matchPercentage}%\n`;
-            report += `  Verified Fields: ${comparisonResults.matches.length}\n`;
-            report += `  Mismatches: ${comparisonResults.mismatches.length}\n`;
-            report += `  Warnings: ${comparisonResults.warnings.length}\n\n`;
-
-            // Extracted Data
-            report += `SYSTEM DATA:\n${'-'.repeat(80)}\n${systemText}\n\n`;
-            report += `LABEL DATA:\n${'-'.repeat(80)}\n${labelText}\n\n`;
-
-            // Verified Matches
-            if (comparisonResults.matches.length > 0) {
-                report += `VERIFIED MATCHES:\n${'-'.repeat(80)}\n`;
-                comparisonResults.matches.forEach(m => {
-                    report += `✓ ${m.field}: ${m.value} (${m.confidence} confidence)\n`;
-                });
-                report += '\n';
+                report += `✗ DIFFERENT ORDERS - DO NOT SHIP!\n`;
+                report += `  System: ${comparisonResults.systemOrders.join(', ') || 'None'}\n`;
+                report += `  Label:  ${comparisonResults.labelOrders.join(', ') || 'None'}\n\n`;
             }
 
-            // Warnings
-            if (comparisonResults.warnings.length > 0) {
-                report += `WARNINGS (VERIFY MANUALLY):\n${'-'.repeat(80)}\n`;
-                comparisonResults.warnings.forEach(w => {
-                    report += `⚠ ${w.field}\n`;
-                    report += `  System: ${w.system}\n`;
-                    report += `  Label:  ${w.label}\n`;
-                    report += `  Note:   ${w.note}\n\n`;
+            // Field Comparisons
+            if (comparisonResults.orderMatch && comparisonResults.fieldComparisons.length > 0) {
+                report += `FIELD-BY-FIELD COMPARISON:\n${'-'.repeat(80)}\n`;
+                comparisonResults.fieldComparisons.forEach(field => {
+                    const status = field.status === 'match' ? '✓' : field.status === 'mismatch' ? '✗' : '⚠';
+                    report += `${status} ${field.field.toUpperCase()}\n`;
+                    report += `  System: ${field.systemValue}\n`;
+                    report += `  Label:  ${field.labelValue}\n`;
+                    report += `  Status: ${field.status.toUpperCase()}\n\n`;
                 });
             }
 
-            // Critical Mismatches
-            if (comparisonResults.mismatches.length > 0) {
-                report += `CRITICAL MISMATCHES:\n${'-'.repeat(80)}\n`;
-                comparisonResults.mismatches.forEach(m => {
-                    report += `✗ ${m.field}\n`;
-                    report += `  System: ${m.system}\n`;
-                    report += `  Label:  ${m.label}\n\n`;
-                });
-            }
+            // Raw Data
+            report += `\nRAW EXTRACTED TEXT:\n${'-'.repeat(80)}\n`;
+            report += `SYSTEM:\n${systemText}\n\n`;
+            report += `LABEL:\n${labelText}\n\n`;
 
-            report += `\n${'='.repeat(80)}\n`;
-            report += `Report generated by FlowCargo AI Order Verification Tool\n`;
-            report += `Enhanced OCR with fuzzy matching and handwriting support\n`;
+            report += `${'='.repeat(80)}\n`;
+            report += `FlowCargo AI - Smart Order Verification\n`;
 
             const blob = new Blob([report], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
@@ -812,50 +607,6 @@
             a.download = `order-verification-${Date.now()}.txt`;
             a.click();
             URL.revokeObjectURL(url);
-        }
-
-        function copyToClipboard() {
-            if (!comparisonResults) return;
-
-            let text = '';
-            
-            // Primary Key
-            if (comparisonResults.primaryKeyMatch) {
-                text += `ORDER: ${comparisonResults.primaryKeyMatch.system} ✓\n`;
-                text += `Confidence: ${(comparisonResults.primaryKeySimilarity * 100).toFixed(0)}%\n\n`;
-            } else {
-                text += `ORDER MISMATCH! ✗\n`;
-                text += `System: ${comparisonResults.systemOrders.join(', ') || 'None'}\n`;
-                text += `Label: ${comparisonResults.labelOrders.join(', ') || 'None'}\n\n`;
-            }
-
-            // Status
-            const criticalIssues = comparisonResults.mismatches.length;
-            text += `Status: ${criticalIssues === 0 ? 'PASSED' : 'FAILED'}\n`;
-            text += `Matches: ${comparisonResults.matches.length}, Issues: ${criticalIssues}, Warnings: ${comparisonResults.warnings.length}\n\n`;
-            
-            // Critical issues
-            if (comparisonResults.mismatches.length > 0) {
-                text += 'CRITICAL ISSUES:\n';
-                comparisonResults.mismatches.forEach(m => {
-                    text += `- ${m.field}: "${m.system}" vs "${m.label}"\n`;
-                });
-                text += '\n';
-            }
-
-            // Warnings
-            if (comparisonResults.warnings.length > 0) {
-                text += 'WARNINGS:\n';
-                comparisonResults.warnings.forEach(w => {
-                    text += `- ${w.field}: "${w.system}" vs "${w.label}" (${w.note})\n`;
-                });
-            }
-
-            navigator.clipboard.writeText(text).then(() => {
-                alert('Results copied to clipboard!');
-            }).catch(err => {
-                alert('Failed to copy: ' + err);
-            });
         }
 
         function reset() {
@@ -868,7 +619,7 @@
             document.getElementById('systemPreview').classList.add('hidden');
             document.getElementById('systemPlaceholder').classList.remove('hidden');
             document.getElementById('labelPreview').classList.add('hidden');
-            document.getElementById('labelPlaceholder').classList.add('hidden');
+            document.getElementById('labelPlaceholder').classList.remove('hidden');
             document.getElementById('results').classList.add('hidden');
             document.getElementById('processingStatus').classList.add('hidden');
             document.getElementById('systemImage').value = '';
@@ -880,6 +631,3 @@
             btn.className = 'bg-gray-400 text-white px-12 py-4 rounded-lg text-lg font-semibold cursor-not-allowed';
             btn.textContent = 'Upload Both Images First';
         }
-    </script>
-</body>
-</html>
