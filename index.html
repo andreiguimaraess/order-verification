@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FlowCargo AI - Order Verification</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src='https://unpkg.com/tesseract.js@4.1.1/dist/tesseract.min.js'></script>
     <style>
         @keyframes spin {
             to { transform: rotate(360deg); }
@@ -16,6 +17,14 @@
             width: 40px;
             height: 40px;
             animation: spin 1s linear infinite;
+        }
+        .comparison-match {
+            background: #ecfdf5;
+            border: 2px solid #10b981;
+        }
+        .comparison-mismatch {
+            background: #fef2f2;
+            border: 2px solid #ef4444;
         }
     </style>
 </head>
@@ -29,25 +38,9 @@
                 </div>
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">Order Verification Tool</h1>
-                    <p class="text-gray-600 text-sm">Compare system orders with physical labels in seconds</p>
+                    <p class="text-gray-600 text-sm">Real OCR - Compare system orders with physical labels</p>
                 </div>
             </div>
-        </div>
-
-        <!-- Alert -->
-        <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-6 rounded">
-            <h3 class="font-bold text-yellow-900 mb-2">⚠️ Demo Version Notice</h3>
-            <p class="text-sm text-yellow-800 mb-2">
-                This is a demo showing the interface. For the <strong>fully working version with OCR</strong>, you need to:
-            </p>
-            <ol class="text-sm text-yellow-800 space-y-1 ml-4 list-decimal">
-                <li>Save this HTML file to your computer</li>
-                <li>Deploy it to Vercel/Netlify (takes 2 minutes)</li>
-                <li>The OCR will work properly when hosted on a real domain</li>
-            </ol>
-            <p class="text-sm text-yellow-800 mt-2">
-                <strong>Or</strong> I can build you a full app with proper backend in a few hours!
-            </p>
         </div>
 
         <!-- Instructions -->
@@ -56,7 +49,8 @@
             <ol class="text-sm text-blue-800 space-y-1 ml-4 list-decimal">
                 <li>Upload a screenshot of the order from your system</li>
                 <li>Upload a photo of the physical box label</li>
-                <li>Click "Compare" and AI will check for mismatches</li>
+                <li>Click "Compare" and AI will extract and compare the text</li>
+                <li>Review matches and mismatches</li>
             </ol>
         </div>
 
@@ -67,13 +61,13 @@
                 <h2 class="text-lg font-bold text-gray-900 mb-4">1️⃣ System Screenshot</h2>
                 <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition cursor-pointer" onclick="document.getElementById('systemImage').click()">
                     <div id="systemPreview" class="hidden">
-                        <img id="systemImg" class="max-h-64 mx-auto rounded mb-4">
+                        <img id="systemImg" class="max-h-64 mx-auto rounded mb-4 object-contain">
                         <p class="text-sm text-gray-600 mb-2">Screenshot uploaded ✓</p>
                     </div>
                     <div id="systemPlaceholder">
                         <div class="text-4xl mb-2">🖥️</div>
                         <p class="text-gray-600 font-semibold mb-1">Upload System Screenshot</p>
-                        <p class="text-sm text-gray-500">Click or drag order details from legacy system</p>
+                        <p class="text-sm text-gray-500">Order details from your legacy system</p>
                     </div>
                 </div>
                 <input type="file" id="systemImage" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'system')">
@@ -87,13 +81,13 @@
                 <h2 class="text-lg font-bold text-gray-900 mb-4">2️⃣ Physical Label Photo</h2>
                 <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-green-400 transition cursor-pointer" onclick="document.getElementById('labelImage').click()">
                     <div id="labelPreview" class="hidden">
-                        <img id="labelImg" class="max-h-64 mx-auto rounded mb-4">
+                        <img id="labelImg" class="max-h-64 mx-auto rounded mb-4 object-contain">
                         <p class="text-sm text-gray-600 mb-2">Label photo uploaded ✓</p>
                     </div>
                     <div id="labelPlaceholder">
                         <div class="text-4xl mb-2">📦</div>
                         <p class="text-gray-600 font-semibold mb-1">Upload Box Label Photo</p>
-                        <p class="text-sm text-gray-500">Take photo of physical package label</p>
+                        <p class="text-sm text-gray-500">Photo of the physical package label</p>
                     </div>
                 </div>
                 <input type="file" id="labelImage" accept="image/*" capture="environment" class="hidden" onchange="handleImageUpload(event, 'label')">
@@ -114,134 +108,62 @@
         <div id="processingStatus" class="hidden bg-blue-50 border-2 border-blue-200 rounded-lg p-6 mb-6">
             <div class="flex items-center gap-4">
                 <div class="spinner"></div>
-                <div>
+                <div class="flex-1">
                     <p class="text-blue-900 font-semibold text-lg">Processing images...</p>
-                    <p id="statusText" class="text-blue-700 text-sm">Extracting text from images using OCR...</p>
+                    <p id="statusText" class="text-blue-700 text-sm mt-1">Initializing OCR engine...</p>
+                    <div class="mt-3 bg-blue-200 h-2 rounded-full overflow-hidden">
+                        <div id="progressBar" class="bg-blue-600 h-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Results Section (Demo) -->
+        <!-- Results Section -->
         <div id="results" class="hidden">
-            <div class="bg-green-50 border-2 border-green-500 rounded-lg p-6 mb-6">
-                <div class="flex items-center gap-4">
-                    <div class="text-5xl">✅</div>
-                    <div>
-                        <h4 class="text-xl font-bold text-green-900">Order Verified! (Demo Result)</h4>
-                        <p class="text-green-700">This is a demo showing how results would appear</p>
-                    </div>
-                </div>
-            </div>
+            <!-- Overall Status -->
+            <div id="overallStatus" class="mb-6"></div>
 
+            <!-- Extracted Data -->
             <div class="grid md:grid-cols-2 gap-6 mb-6">
                 <div class="bg-white rounded-lg shadow-lg p-6">
                     <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <span class="text-blue-600">🖥️</span> System Data (Example)
+                        <span class="text-blue-600">🖥️</span> System Data Extracted
                     </h3>
-                    <div class="bg-gray-50 p-4 rounded text-sm">
-                        <p class="font-semibold mb-2">Order: ORD-2024-12345</p>
-                        <p>Customer: ABC Logistics BV</p>
-                        <p>Quantity: 24 boxes</p>
-                        <p>Destination: Rotterdam</p>
-                        <p>Date: 21-10-2024</p>
-                    </div>
+                    <pre id="systemData" class="bg-gray-50 p-4 rounded text-xs font-mono overflow-auto max-h-64 whitespace-pre-wrap border border-gray-200"></pre>
                 </div>
                 <div class="bg-white rounded-lg shadow-lg p-6">
                     <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <span class="text-green-600">📦</span> Label Data (Example)
+                        <span class="text-green-600">📦</span> Label Data Extracted
                     </h3>
-                    <div class="bg-gray-50 p-4 rounded text-sm">
-                        <p class="font-semibold mb-2">Order: ORD-2024-12345</p>
-                        <p>Customer: ABC Logistics BV</p>
-                        <p>Quantity: 24 boxes</p>
-                        <p>Destination: Rotterdam</p>
-                        <p>Date: 21-10-2024</p>
-                    </div>
+                    <pre id="labelData" class="bg-gray-50 p-4 rounded text-xs font-mono overflow-auto max-h-64 whitespace-pre-wrap border border-gray-200"></pre>
                 </div>
             </div>
 
+            <!-- Comparison Results -->
             <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-                <h3 class="font-bold text-gray-900 mb-4 text-xl">Verification Results</h3>
-                <div class="mb-6">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-sm font-semibold text-gray-700">Overall Match</span>
-                        <span class="text-sm font-bold text-green-600">100%</span>
-                    </div>
-                    <div class="bg-gray-200 h-4 rounded-full overflow-hidden">
-                        <div class="h-full bg-green-500" style="width: 100%"></div>
-                    </div>
-                </div>
+                <h3 class="font-bold text-gray-900 mb-4 text-xl">🔍 Comparison Analysis</h3>
+                
+                <!-- Match Percentage -->
+                <div id="matchPercentage" class="mb-6"></div>
 
-                <h4 class="font-bold text-gray-900 mb-3">✓ All Fields Match:</h4>
-                <div class="space-y-2">
-                    <div class="border-2 bg-green-50 border-green-300 rounded-lg p-3">
-                        <span class="text-gray-700">Order Number:</span>
-                        <span class="font-mono font-bold ml-2 text-green-900">ORD-2024-12345</span>
-                    </div>
-                    <div class="border-2 bg-green-50 border-green-300 rounded-lg p-3">
-                        <span class="text-gray-700">Quantity:</span>
-                        <span class="font-mono font-bold ml-2 text-green-900">24</span>
-                    </div>
-                    <div class="border-2 bg-green-50 border-green-300 rounded-lg p-3">
-                        <span class="text-gray-700">Destination:</span>
-                        <span class="font-mono font-bold ml-2 text-green-900">Rotterdam</span>
-                    </div>
-                </div>
+                <!-- Detected Fields -->
+                <div id="detectedFields"></div>
+
+                <!-- Text Similarity -->
+                <div id="textSimilarity" class="mt-6"></div>
             </div>
 
+            <!-- Actions -->
             <div class="flex gap-4">
                 <button onclick="reset()" class="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition">
                     🔄 Check Another Order
                 </button>
-                <button onclick="alert('In production version, this downloads a detailed PDF report')" class="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
+                <button onclick="downloadReport()" class="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
                     📥 Download Report
                 </button>
-            </div>
-        </div>
-
-        <!-- Deployment Instructions -->
-        <div class="bg-white rounded-lg shadow-lg p-6 mt-8">
-            <h3 class="text-xl font-bold text-gray-900 mb-4">🚀 Get The Full Working Version</h3>
-            
-            <div class="space-y-4">
-                <div class="border-l-4 border-blue-500 bg-blue-50 p-4 rounded-r">
-                    <h4 class="font-bold text-blue-900 mb-2">Option 1: Quick Deploy (5 minutes)</h4>
-                    <ol class="text-sm text-blue-800 space-y-2 ml-4 list-decimal">
-                        <li>Right-click this page → Save As → order-verification.html</li>
-                        <li>Go to <a href="https://vercel.com" target="_blank" class="underline font-semibold">vercel.com</a> and sign up (free)</li>
-                        <li>Drag and drop the HTML file</li>
-                        <li>Get a live URL and the OCR will work!</li>
-                    </ol>
-                </div>
-
-                <div class="border-l-4 border-green-500 bg-green-50 p-4 rounded-r">
-                    <h4 class="font-bold text-green-900 mb-2">Option 2: Professional Version (I build it for you)</h4>
-                    <p class="text-sm text-green-800 mb-2">I can build you a production-ready version with:</p>
-                    <ul class="text-sm text-green-800 space-y-1 ml-4 list-disc">
-                        <li>Real OCR that works perfectly</li>
-                        <li>Mobile-optimized (use on phone)</li>
-                        <li>Database to save all verifications</li>
-                        <li>Custom fields for your specific system</li>
-                        <li>Export to Excel/PDF reports</li>
-                        <li>User accounts and history</li>
-                    </ul>
-                    <p class="text-sm text-green-800 mt-2 font-semibold">Time: 2-3 days of work</p>
-                </div>
-
-                <div class="border-l-4 border-purple-500 bg-purple-50 p-4 rounded-r">
-                    <h4 class="font-bold text-purple-900 mb-2">Option 3: MVP with Backend (Best for production)</h4>
-                    <p class="text-sm text-purple-800 mb-2">Full application with:</p>
-                    <ul class="text-sm text-purple-800 space-y-1 ml-4 list-disc">
-                        <li>React frontend + Node.js backend</li>
-                        <li>Google Vision API or AWS Textract (better OCR)</li>
-                        <li>PostgreSQL database</li>
-                        <li>Authentication and user management</li>
-                        <li>Mobile app (React Native)</li>
-                        <li>Barcode scanning support</li>
-                        <li>Real-time notifications</li>
-                    </ul>
-                    <p class="text-sm text-purple-800 mt-2 font-semibold">Time: 1-2 weeks of work</p>
-                </div>
+                <button onclick="copyToClipboard()" class="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition">
+                    📋 Copy Results
+                </button>
             </div>
         </div>
     </div>
@@ -249,6 +171,9 @@
     <script>
         let systemImageData = null;
         let labelImageData = null;
+        let systemText = '';
+        let labelText = '';
+        let comparisonResults = null;
 
         function handleImageUpload(event, type) {
             const file = event.target.files[0];
@@ -271,44 +196,355 @@
                 if (systemImageData && labelImageData) {
                     const btn = document.getElementById('compareBtn');
                     btn.disabled = false;
-                    btn.className = 'bg-blue-600 text-white px-12 py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-all shadow-lg';
-                    btn.textContent = '🔍 Compare Images (Demo)';
+                    btn.className = 'bg-blue-600 text-white px-12 py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-all shadow-lg cursor-pointer';
+                    btn.textContent = '🔍 Compare Images with OCR';
                 }
             };
             reader.readAsDataURL(file);
         }
 
-        function compareImages() {
+        function updateStatus(message, progress) {
+            document.getElementById('statusText').textContent = message;
+            if (progress !== undefined) {
+                document.getElementById('progressBar').style.width = progress + '%';
+            }
+        }
+
+        async function compareImages() {
             document.getElementById('processingStatus').classList.remove('hidden');
             document.getElementById('results').classList.add('hidden');
-            
-            document.getElementById('statusText').textContent = 'Reading system screenshot...';
-            
-            setTimeout(() => {
-                document.getElementById('statusText').textContent = 'Reading label photo...';
-            }, 1000);
-            
-            setTimeout(() => {
-                document.getElementById('statusText').textContent = 'Comparing data...';
-            }, 2000);
-            
-            setTimeout(() => {
+
+            try {
+                // Extract text from system screenshot
+                updateStatus('Reading system screenshot with OCR...', 10);
+                systemText = await extractText(systemImageData, 'system');
+                document.getElementById('systemData').textContent = systemText || 'No text detected';
+                updateStatus('System screenshot processed ✓', 50);
+
+                // Extract text from label photo
+                updateStatus('Reading label photo with OCR...', 50);
+                labelText = await extractText(labelImageData, 'label');
+                document.getElementById('labelData').textContent = labelText || 'No text detected';
+                updateStatus('Label photo processed ✓', 90);
+
+                // Compare the texts
+                updateStatus('Analyzing and comparing data...', 95);
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                comparisonResults = compareTexts(systemText, labelText);
+                displayResults(comparisonResults);
+                
+                updateStatus('Complete!', 100);
+                setTimeout(() => {
+                    document.getElementById('processingStatus').classList.add('hidden');
+                    document.getElementById('results').classList.remove('hidden');
+                }, 500);
+
+            } catch (error) {
+                console.error('Error during comparison:', error);
+                updateStatus('Error: ' + error.message, 0);
+                alert('Error processing images. Please try again with clearer photos.');
                 document.getElementById('processingStatus').classList.add('hidden');
-                document.getElementById('results').classList.remove('hidden');
-            }, 3000);
+            }
+        }
+
+        async function extractText(imageData, source) {
+            try {
+                const result = await Tesseract.recognize(
+                    imageData,
+                    'eng+nld',
+                    {
+                        logger: info => {
+                            if (info.status === 'recognizing text') {
+                                const progress = source === 'system' 
+                                    ? 10 + (info.progress * 40)
+                                    : 50 + (info.progress * 40);
+                                updateStatus(`Reading ${source} image: ${Math.round(info.progress * 100)}%`, progress);
+                            }
+                        }
+                    }
+                );
+                return result.data.text;
+            } catch (error) {
+                console.error('OCR Error:', error);
+                throw new Error('Failed to read text from ' + source + ' image');
+            }
+        }
+
+        function compareTexts(system, label) {
+            // Extract key information using regex patterns
+            const patterns = {
+                orderNumber: /(?:order|ord|#|nr|nummer)\s*:?\s*([A-Z0-9-]+)/gi,
+                quantity: /(?:qty|quantity|aantal|stuks)\s*:?\s*(\d+)/gi,
+                date: /\b\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4}\b/g,
+                postal: /\b\d{4}\s?[A-Z]{2}\b/g,
+                numbers: /\b\d{3,}\b/g
+            };
+
+            const systemData = extractPatterns(system, patterns);
+            const labelData = extractPatterns(label, patterns);
+
+            const matches = [];
+            const mismatches = [];
+
+            // Compare order numbers
+            if (systemData.orderNumber.length > 0 || labelData.orderNumber.length > 0) {
+                const commonOrders = systemData.orderNumber.filter(o => 
+                    labelData.orderNumber.some(l => l.toLowerCase() === o.toLowerCase())
+                );
+                
+                if (commonOrders.length > 0) {
+                    matches.push({
+                        field: 'Order Number',
+                        value: commonOrders[0],
+                        confidence: 'high'
+                    });
+                } else {
+                    mismatches.push({
+                        field: 'Order Number',
+                        system: systemData.orderNumber.join(', ') || 'Not found',
+                        label: labelData.orderNumber.join(', ') || 'Not found',
+                        severity: 'high'
+                    });
+                }
+            }
+
+            // Compare quantities
+            if (systemData.quantity.length > 0 && labelData.quantity.length > 0) {
+                const sysQty = systemData.quantity[0];
+                const lblQty = labelData.quantity[0];
+                
+                if (sysQty === lblQty) {
+                    matches.push({
+                        field: 'Quantity',
+                        value: sysQty,
+                        confidence: 'high'
+                    });
+                } else {
+                    mismatches.push({
+                        field: 'Quantity',
+                        system: sysQty,
+                        label: lblQty,
+                        severity: 'high'
+                    });
+                }
+            }
+
+            // Compare dates
+            if (systemData.date.length > 0 && labelData.date.length > 0) {
+                const commonDates = systemData.date.filter(d => labelData.date.includes(d));
+                if (commonDates.length > 0) {
+                    matches.push({
+                        field: 'Date',
+                        value: commonDates[0],
+                        confidence: 'medium'
+                    });
+                }
+            }
+
+            // Compare postal codes
+            if (systemData.postal.length > 0 && labelData.postal.length > 0) {
+                const commonPostal = systemData.postal.filter(p => labelData.postal.includes(p));
+                if (commonPostal.length > 0) {
+                    matches.push({
+                        field: 'Postal Code',
+                        value: commonPostal[0],
+                        confidence: 'medium'
+                    });
+                }
+            }
+
+            // Calculate text similarity
+            const systemWords = new Set(system.toLowerCase().match(/\b[a-z0-9]{3,}\b/g) || []);
+            const labelWords = new Set(label.toLowerCase().match(/\b[a-z0-9]{3,}\b/g) || []);
+            const commonWords = [...systemWords].filter(w => labelWords.has(w));
+            const matchPercentage = systemWords.size > 0 
+                ? Math.round((commonWords.length / Math.max(systemWords.size, labelWords.size)) * 100)
+                : 0;
+
+            return {
+                matches,
+                mismatches,
+                matchPercentage,
+                commonWords,
+                systemData,
+                labelData
+            };
+        }
+
+        function extractPatterns(text, patterns) {
+            const result = {};
+            for (const [key, pattern] of Object.entries(patterns)) {
+                const matches = [...text.matchAll(pattern)].map(m => m[1] || m[0]);
+                result[key] = [...new Set(matches)]; // Remove duplicates
+            }
+            return result;
+        }
+
+        function displayResults(results) {
+            // Overall status
+            const overallDiv = document.getElementById('overallStatus');
+            const hasIssues = results.mismatches.length > 0;
+            
+            overallDiv.innerHTML = `
+                <div class="border-2 rounded-lg p-6 ${hasIssues ? 'bg-yellow-50 border-yellow-500' : 'bg-green-50 border-green-500'}">
+                    <div class="flex items-center gap-4">
+                        <div class="text-5xl">${hasIssues ? '⚠️' : '✅'}</div>
+                        <div>
+                            <h4 class="text-xl font-bold ${hasIssues ? 'text-yellow-900' : 'text-green-900'}">
+                                ${hasIssues ? 'Review Required' : 'Order Verified!'}
+                            </h4>
+                            <p class="${hasIssues ? 'text-yellow-700' : 'text-green-700'}">
+                                ${results.matches.length} matches, ${results.mismatches.length} issues found
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Match percentage
+            const matchDiv = document.getElementById('matchPercentage');
+            const color = results.matchPercentage >= 70 ? 'green' : results.matchPercentage >= 40 ? 'yellow' : 'red';
+            matchDiv.innerHTML = `
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-semibold text-gray-700">Text Similarity</span>
+                    <span class="text-sm font-bold text-${color}-600">${results.matchPercentage}%</span>
+                </div>
+                <div class="bg-gray-200 h-4 rounded-full overflow-hidden">
+                    <div class="h-full bg-${color}-500 transition-all" style="width: ${results.matchPercentage}%"></div>
+                </div>
+                <p class="text-xs text-gray-600 mt-1">${results.commonWords.length} common words found</p>
+            `;
+
+            // Detected fields
+            let fieldsHtml = '';
+            
+            if (results.mismatches.length > 0) {
+                fieldsHtml += '<div class="mb-4"><h4 class="font-bold text-red-900 mb-3">❌ Mismatches:</h4>';
+                results.mismatches.forEach(mismatch => {
+                    fieldsHtml += `
+                        <div class="comparison-mismatch rounded-lg p-4 mb-3">
+                            <p class="font-semibold text-gray-900 mb-2">${mismatch.field}</p>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span class="text-gray-600">System:</span>
+                                    <span class="font-mono font-bold ml-2 text-red-900">${mismatch.system}</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600">Label:</span>
+                                    <span class="font-mono font-bold ml-2 text-red-900">${mismatch.label}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                fieldsHtml += '</div>';
+            }
+
+            if (results.matches.length > 0) {
+                fieldsHtml += '<div><h4 class="font-bold text-green-900 mb-3">✓ Verified Matches:</h4>';
+                results.matches.forEach(match => {
+                    fieldsHtml += `
+                        <div class="comparison-match rounded-lg p-3 mb-2 flex justify-between items-center">
+                            <div>
+                                <span class="text-gray-700 font-semibold">${match.field}:</span>
+                                <span class="font-mono font-bold ml-2 text-green-900">${match.value}</span>
+                            </div>
+                            <span class="text-xs px-2 py-1 bg-green-200 text-green-800 rounded">${match.confidence} confidence</span>
+                        </div>
+                    `;
+                });
+                fieldsHtml += '</div>';
+            }
+
+            if (results.matches.length === 0 && results.mismatches.length === 0) {
+                fieldsHtml = `
+                    <div class="bg-gray-50 border-2 border-gray-300 rounded-lg p-6 text-center">
+                        <p class="text-gray-600">No specific fields detected. Check the extracted text above to verify manually.</p>
+                    </div>
+                `;
+            }
+
+            document.getElementById('detectedFields').innerHTML = fieldsHtml;
+        }
+
+        function downloadReport() {
+            if (!comparisonResults) return;
+
+            const timestamp = new Date().toLocaleString('nl-NL');
+            let report = `ORDER VERIFICATION REPORT\n`;
+            report += `Generated: ${timestamp}\n`;
+            report += `${'='.repeat(60)}\n\n`;
+
+            report += `VERIFICATION STATUS: ${comparisonResults.mismatches.length === 0 ? 'PASSED ✓' : 'FAILED ✗'}\n`;
+            report += `Match Percentage: ${comparisonResults.matchPercentage}%\n\n`;
+
+            report += `SYSTEM DATA:\n${'-'.repeat(60)}\n${systemText}\n\n`;
+            report += `LABEL DATA:\n${'-'.repeat(60)}\n${labelText}\n\n`;
+
+            if (comparisonResults.matches.length > 0) {
+                report += `VERIFIED MATCHES:\n${'-'.repeat(60)}\n`;
+                comparisonResults.matches.forEach(m => {
+                    report += `✓ ${m.field}: ${m.value}\n`;
+                });
+                report += '\n';
+            }
+
+            if (comparisonResults.mismatches.length > 0) {
+                report += `MISMATCHES FOUND:\n${'-'.repeat(60)}\n`;
+                comparisonResults.mismatches.forEach(m => {
+                    report += `✗ ${m.field}\n`;
+                    report += `  System: ${m.system}\n`;
+                    report += `  Label:  ${m.label}\n\n`;
+                });
+            }
+
+            report += `\n${'='.repeat(60)}\n`;
+            report += `Report generated by FlowCargo AI Order Verification Tool\n`;
+
+            const blob = new Blob([report], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `order-verification-${Date.now()}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function copyToClipboard() {
+            if (!comparisonResults) return;
+
+            let text = `Verification: ${comparisonResults.mismatches.length === 0 ? 'PASSED' : 'FAILED'}\n`;
+            text += `Matches: ${comparisonResults.matches.length}, Issues: ${comparisonResults.mismatches.length}\n\n`;
+            
+            if (comparisonResults.mismatches.length > 0) {
+                text += 'ISSUES:\n';
+                comparisonResults.mismatches.forEach(m => {
+                    text += `- ${m.field}: System="${m.system}" vs Label="${m.label}"\n`;
+                });
+            }
+
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Results copied to clipboard!');
+            });
         }
 
         function reset() {
             systemImageData = null;
             labelImageData = null;
+            systemText = '';
+            labelText = '';
+            comparisonResults = null;
             
             document.getElementById('systemPreview').classList.add('hidden');
             document.getElementById('systemPlaceholder').classList.remove('hidden');
             document.getElementById('labelPreview').classList.add('hidden');
             document.getElementById('labelPlaceholder').classList.remove('hidden');
             document.getElementById('results').classList.add('hidden');
+            document.getElementById('processingStatus').classList.add('hidden');
             document.getElementById('systemImage').value = '';
             document.getElementById('labelImage').value = '';
+            document.getElementById('progressBar').style.width = '0%';
             
             const btn = document.getElementById('compareBtn');
             btn.disabled = true;
